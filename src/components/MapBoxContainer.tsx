@@ -1,8 +1,18 @@
+/* eslint-disable import/no-webpack-loader-syntax */
+
 import React, { useEffect, useRef } from 'react';
-import mapboxgl, { LngLatLike } from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { useDispatch } from 'react-redux';
 import { updateFlyToLocation } from './parkingWidget/parkingWidgetSlice';
+
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+// Fix for transpiler issue (see https://github.com/visgl/react-map-gl/issues/1266#issuecomment-1527485925)
+// @ts-ignore
+import mapboxgl, { LngLatLike } from 'mapbox-gl/dist/mapbox-gl-csp';
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax, import/no-unresolved
+import MapboxWorker from 'worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
+mapboxgl.workerClass = MapboxWorker;
 
 type mapAndContainer = {
   setMap: React.Dispatch<React.SetStateAction<mapboxgl.Map | null>>;
