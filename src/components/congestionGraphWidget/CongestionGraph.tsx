@@ -119,7 +119,7 @@ class ApexChart extends React.Component<{}, State> {
           {`
             .apexcharts-legend {
               border: 1px solid #ccc;
-              border-radius: 5px;
+              border-radius: 10px;
               padding: 10px;
             }
           `}
