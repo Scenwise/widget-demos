@@ -26,13 +26,13 @@ function values() {
 
 function getColor(value: number): string {
   if (value < 40) {
-    return "#00FF00"; // Green
+    return "#8bc34a"; // Green
   } else if (value >= 40 && value < 60) {
-    return "#FFFF00"; // Yellow
+    return "#ffeb3b"; // Yellow
   } else if (value >= 60 && value < 80) {
-    return "#FFA500"; // Orange
+    return "#ff9800"; // Orange
   } else {
-    return "#FF0000"; // Red
+    return "#f44336"; // Red
   }
 }
 
