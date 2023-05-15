@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
-import React from 'react';
-import ParkingWidget from './components/parkingWidget/ParkingWidget';
 import WidgetWrapper from './components/WidgetWrapper';
+import CongestionGraph from './components/congestionGraphWidget/CongestionGraph'
+import ParkingWidget from './components/parkingWidget/ParkingWidget';
 
 function App() {
   return (
@@ -13,6 +13,9 @@ function App() {
         display: 'grid',
       }}
     >
+      <WidgetWrapper>
+        <CongestionGraph />
+      </WidgetWrapper>
       <WidgetWrapper>
         <ParkingWidget />
       </WidgetWrapper>
