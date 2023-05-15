@@ -79,6 +79,14 @@ class ApexChart extends React.Component<{}, State> {
             endAngle: 90,
             offsetY: 10,
           },
+          polarArea: {
+            rings: {
+              strokeWidth: 2
+            },
+            spokes: {
+              strokeWidth: 2
+            }
+          }
         },
         legend: {
           position: "top",
@@ -121,6 +129,7 @@ class ApexChart extends React.Component<{}, State> {
               border: 1px solid #ccc;
               border-radius: 10px;
               padding: 10px;
+              background-color: rgba(0, 0, 0, 0.01);
             }
           `}
         </style>
