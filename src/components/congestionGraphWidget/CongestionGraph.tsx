@@ -1,6 +1,7 @@
-import React from 'react';
-import ReactApexChart from 'react-apexcharts';
-import 'apexcharts/dist/apexcharts.css';
+import React from "react";
+import ReactApexChart from "react-apexcharts";
+import "apexcharts/dist/apexcharts.css";
+import {Typography} from '@mui/material';
 
 interface State {
   series: number[];
@@ -8,16 +9,16 @@ interface State {
 }
 
 function hours() {
-  let arr = []
-  for(let i = 0; i < 24; i++) {
-    arr.push(i + ":00")
+  let arr = [];
+  for (let i = 0; i < 24; i++) {
+    arr.push(i + ":00");
   }
   return arr;
 }
 
 function values() {
-  let arr = []
-  for(let i = 0; i < 24; i++) {
+  let arr = [];
+  for (let i = 0; i < 24; i++) {
     arr.push(Math.floor(Math.random() * 100));
   }
   return arr;
@@ -25,13 +26,13 @@ function values() {
 
 function getColor(value: number): string {
   if (value < 40) {
-    return '#00FF00'; // Green
+    return "#00FF00"; // Green
   } else if (value >= 40 && value < 60) {
-    return '#FFFF00'; // Yellow
+    return "#FFFF00"; // Yellow
   } else if (value >= 60 && value < 80) {
-    return '#FFA500'; // Orange
+    return "#FFA500"; // Orange
   } else {
-    return '#FF0000'; // Red
+    return "#FF0000"; // Red
   }
 }
 
@@ -46,22 +47,22 @@ class ApexChart extends React.Component<{}, State> {
       series: data,
       options: {
         chart: {
-          type: 'polarArea',
+          type: "polarArea",
         },
         tooltip: {
           fillSeriesColor: false,
-          theme: 'light',
+          theme: "light",
           marker: {
-            show: false
-          }
+            show: false,
+          },
         },
         yaxis: {
           tickAmount: 6,
           labels: {
             style: {
-              fontSize: '15px'
-            }
-          }
+              fontSize: "15px",
+            },
+          },
         },
         labels: labels,
         stroke: {
@@ -73,26 +74,26 @@ class ApexChart extends React.Component<{}, State> {
           colors: colors,
         },
         plotOptions: {
-            pie: {
-              startAngle: -90,
-              endAngle: 90,
-              offsetY: 10
-            },
+          pie: {
+            startAngle: -90,
+            endAngle: 90,
+            offsetY: 10,
+          },
         },
         legend: {
-          position: 'top',
-          fontSize: '15px',
+          position: "top",
+          fontSize: "15px",
           offsetY: 20,
-          offsetX: 2,
+          offsetX: 7,
           width: 80,
           height: 125,
           onItemHover: {
-            highlightDataSeries: false
+            highlightDataSeries: false,
           },
           floating: true,
           markers: {
             fillColors: colors,
-          }
+          },
         },
         responsive: [
           {
@@ -102,7 +103,7 @@ class ApexChart extends React.Component<{}, State> {
                 width: 200,
               },
               legend: {
-                position: 'left',
+                position: "left",
               },
             },
           },
@@ -123,6 +124,7 @@ class ApexChart extends React.Component<{}, State> {
             }
           `}
         </style>
+        <Typography variant="h6" style={{paddingLeft:'20px', paddingTop:'20px'}}>Proportion of congestion</Typography>
         <ReactApexChart
           options={this.state.options}
           series={this.state.series}
