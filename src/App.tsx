@@ -16,9 +16,6 @@ function App() {
       <WidgetWrapper>
         <CongestionGraph />
       </WidgetWrapper>
-      <WidgetWrapper>
-        <ParkingWidget />
-      </WidgetWrapper>
     </Box>
   );
 }

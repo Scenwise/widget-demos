@@ -36,6 +36,11 @@ function getColor(value: number): string {
   }
 }
 
+function getChartHeight(): number | undefined {
+
+  return document.getElementById("wrapper")?.clientHeight
+}
+
 class ApexChart extends React.Component<{}, State> {
   constructor(props: {}) {
     super(props);
@@ -134,12 +139,12 @@ class ApexChart extends React.Component<{}, State> {
           `}
         </style>
         <Typography variant="h6" style={{paddingLeft:'20px', paddingTop:'20px'}}>Proportion of congestion</Typography>
-        <ReactApexChart
-          options={this.state.options}
-          series={this.state.series}
-          type="polarArea"
-        />
-      </div>
+            <ReactApexChart
+              options={this.state.options}
+              series={this.state.series}
+              type="polarArea"
+            />
+          </div>
     );
   }
 }
