@@ -36,11 +36,6 @@ function getColor(value: number): string {
   }
 }
 
-function getChartHeight(): number | undefined {
-
-  return document.getElementById("wrapper")?.clientHeight
-}
-
 class ApexChart extends React.Component<{}, State> {
   constructor(props: {}) {
     super(props);
@@ -69,13 +64,22 @@ class ApexChart extends React.Component<{}, State> {
             },
           },
         },
+        title: {
+          text: "Today",
+          align: "left",
+          style: {
+            fontSize: '15px',
+            fontWeight: 'normal',
+            fontFamily: "source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;"
+          }
+        },
         labels: labels,
         stroke: {
           colors: colors,
           width: 1,
         },
         fill: {
-          opacity: 0.7,
+          opacity: 0.6,
           colors: colors,
         },
         plotOptions: {
@@ -127,7 +131,7 @@ class ApexChart extends React.Component<{}, State> {
 
   render() {
     return (
-      <div id="chart">
+      <div style={{height: '379.7px', overflow: 'hidden', margin: '10px'}}>
         <style>
           {`
             .apexcharts-legend {
@@ -138,7 +142,7 @@ class ApexChart extends React.Component<{}, State> {
             }
           `}
         </style>
-        <Typography variant="h6" style={{paddingLeft:'20px', paddingTop:'20px'}}>Proportion of congestion</Typography>
+        <Typography variant="h6" style={{paddingLeft:'5px'}}>Proportion of congestion</Typography>
             <ReactApexChart
               options={this.state.options}
               series={this.state.series}

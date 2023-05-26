@@ -1,7 +1,9 @@
 import { Box } from '@mui/material';
 import WidgetWrapper from './components/WidgetWrapper';
-import CongestionGraph from './components/congestionGraphWidget/CongestionGraph'
+import CongestionGraph from './components/dashboard/CongestionGraph'
+import VehiclePassingGraph from './components/dashboard/VehiclePassingGraph'
 import ParkingWidget from './components/parkingWidget/ParkingWidget';
+import IntersectionDashboard from './components/dashboard/IntersectionDashboard';
 
 function App() {
   return (
@@ -14,7 +16,7 @@ function App() {
       }}
     >
       <WidgetWrapper>
-        <CongestionGraph />
+        <IntersectionDashboard />
       </WidgetWrapper>
     </Box>
   );
