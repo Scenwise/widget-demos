@@ -17,6 +17,9 @@ function App() {
         display: 'grid',
       }}
     >
+      <WidgetWrapper>
+        <IntersectionDashboard />
+      </WidgetWrapper>
       <RiskMap></RiskMap>
     </Box>
   );
