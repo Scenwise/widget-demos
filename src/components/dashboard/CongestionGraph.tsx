@@ -19,8 +19,18 @@ function hours() {
 function values() {
   let arr = [];
   for (let i = 0; i < 24; i++) {
-    arr.push(Math.floor(Math.random() * 100));
+    arr.push(Math.floor(Math.random() * 70));
   }
+  arr[5] = 20;
+  arr[6] = 80;
+  arr[7] = 90;
+  arr[8] = 80;
+  arr[9] = 70;
+
+  arr[16] = 70;
+  arr[17] = 90;
+  arr[18] = 95;
+  arr[19] = 70;
   return arr;
 }
 

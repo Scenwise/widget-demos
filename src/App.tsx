@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Box } from '@mui/material';
 import WidgetWrapper from './components/WidgetWrapper';
 import CongestionGraph from './components/dashboard/CongestionGraph'
 import VehiclePassingGraph from './components/dashboard/VehiclePassingGraph'
 import ParkingWidget from './components/parkingWidget/ParkingWidget';
+import ExcelParser from './components/riskmap/ExcelParser'
 import IntersectionDashboard from './components/dashboard/IntersectionDashboard';
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
       <WidgetWrapper>
         <IntersectionDashboard />
       </WidgetWrapper>
+      <ExcelParser></ExcelParser>
     </Box>
   );
 }
