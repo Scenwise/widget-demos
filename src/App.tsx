@@ -4,7 +4,7 @@ import WidgetWrapper from './components/WidgetWrapper';
 import CongestionGraph from './components/dashboard/CongestionGraph'
 import VehiclePassingGraph from './components/dashboard/VehiclePassingGraph'
 import ParkingWidget from './components/parkingWidget/ParkingWidget';
-import ExcelParser from './components/riskmap/ExcelParser'
+import RiskMap from './components/riskmap/RiskMap'
 import IntersectionDashboard from './components/dashboard/IntersectionDashboard';
 
 function App() {
@@ -17,10 +17,7 @@ function App() {
         display: 'grid',
       }}
     >
-      <WidgetWrapper>
-        <IntersectionDashboard />
-      </WidgetWrapper>
-      <ExcelParser></ExcelParser>
+      <RiskMap></RiskMap>
     </Box>
   );
 }
