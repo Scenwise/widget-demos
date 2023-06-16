@@ -20,7 +20,6 @@ import featureCollectionConverter from "./featureCollectionConverter";
 import MapBoxContainer from '../MapBoxContainer';
 import AccidentLocationListItem from './AccidentLocationListItem';
 
-
 const RiskMap = () => {
   // Parse the Excel file to retrieve the accidents
   let accidents = useRef<Array<AccidentData>>([]);
@@ -31,10 +30,12 @@ const RiskMap = () => {
   useEffect(() => {
     if (!map) return;
     // Note: all excel files should stay in the "public" folder for them to be parsed
-    const filePath = "./accidents-excel/accidents_location.xlsx";
+    const filePath = "../../../public/accidents-excel/brabant2022.xlsx";
     const fetchData = async () => {
       const response = await fetch(filePath);
+      console.log(response);
       const data = await response.arrayBuffer();
+      console.log(data)
       const workbook = XLSX.read(data, { type: "array", cellDates: true });
       const worksheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[worksheetName];
