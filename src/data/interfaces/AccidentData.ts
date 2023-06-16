@@ -12,4 +12,6 @@ export type AccidentData = {
   Proces: string; // reason of the accident
   Beschrijving: string; // description
   Melder: string; // reporter
+  Longitude: number;
+  Latitude: number;
 };

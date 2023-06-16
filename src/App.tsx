@@ -9,19 +9,20 @@ import IntersectionDashboard from "./components/dashboard/IntersectionDashboard"
 
 function App() {
   return (
-    <Box
-      sx={{
-        width: "100vw",
-        height: "100vh",
-        placeItems: "center",
-        display: "grid",
-      }}
-    >
-      <WidgetWrapper>
-        <IntersectionDashboard />
-      </WidgetWrapper>
-      <RiskMap></RiskMap>
-    </Box>
+    // <Box
+    //   sx={{
+    //     width: "100vw",
+    //     height: "100vh",
+    //     placeItems: "center",
+    //     display: "grid",
+    //   }}
+    // >
+    //   <WidgetWrapper>
+    //     <IntersectionDashboard />
+    //   </WidgetWrapper>
+    //   <RiskMap></RiskMap>
+    // </Box>
+    <ParkingWidget/>
   );
 }
 
