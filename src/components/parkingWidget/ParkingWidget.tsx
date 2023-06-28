@@ -184,7 +184,7 @@ function ParkingWidget() {
 
       <Box p={1} flexGrow={1} width="60%">
         <Box sx={{ borderRadius: 6, overflow: 'hidden' }} height="100%">
-          <MapBoxContainer mapState={[map, setMap]} />
+          <MapBoxContainer mapState={[map, setMap]} location={[4.89746, 52.374367] as LngLatLike} zoomLevel={11}/>
         </Box>
       </Box>
     </Stack>

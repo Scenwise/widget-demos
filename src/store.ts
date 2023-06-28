@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import parkingWidgetSlice from './components/parkingWidget/parkingWidgetSlice';
+import accidentsWidgetSlice from './components/riskmap/accidentsWidgetSlice';
 
 export const store = configureStore({
   reducer: {
     parkingWidget: parkingWidgetSlice,
+    accidentsWidget: accidentsWidgetSlice
   },
 });
 

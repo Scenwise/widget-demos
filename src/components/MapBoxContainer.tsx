@@ -17,15 +17,19 @@ mapboxgl.workerClass = MapboxWorker;
 type mapAndContainer = {
   setMap: React.Dispatch<React.SetStateAction<mapboxgl.Map | null>>;
   mapContainer: React.MutableRefObject<HTMLDivElement | null>;
+  location: LngLatLike;
+  zoomLevel: number;
 };
 
 type UseState<T> = [T, React.Dispatch<React.SetStateAction<T>>];
 
 interface MapBoxContainerProps {
   mapState: UseState<mapboxgl.Map | null>;
+  location: LngLatLike;
+  zoomLevel: number;
 }
 
-function MapBoxContainer({ mapState }: MapBoxContainerProps) {
+function MapBoxContainer({ mapState, location, zoomLevel }: MapBoxContainerProps) {
   const [map, setMap] = mapState;
   const mapContainer = useRef<HTMLDivElement | null>(null);
 
@@ -38,13 +42,13 @@ function MapBoxContainer({ mapState }: MapBoxContainerProps) {
       throw new Error('Missing accesstoken for mapboxgl');
     }
 
-    if (!map) initializeMap({ setMap, mapContainer });
+    if (!map) initializeMap({ setMap, mapContainer, location, zoomLevel });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
-  const initializeMap = ({ setMap, mapContainer }: mapAndContainer): void => {
-    const center: LngLatLike = [4.89746, 52.374367];
-    const zoom: number = 11;
+  const initializeMap = ({ setMap, mapContainer, location, zoomLevel }: mapAndContainer): void => {
+    const center: LngLatLike = location;
+    const zoom: number = zoomLevel;
 
     const map = new mapboxgl.Map({
       container: mapContainer.current as string | HTMLElement,
