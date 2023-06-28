@@ -3,7 +3,7 @@
 
 export type AccidentData = {
   ID: number; // id
-  Startdatum: Date; // start date, access value with: accidents.current[i].Startdatum.toString()
+  Starttijd: Date; // start date, access value with: accidents.current[i].Startdatum.toString()
   Einddatum: Date; // end date
   Weg: string; // road
   Zijde: string; // road side
@@ -12,6 +12,11 @@ export type AccidentData = {
   Proces: string; // reason of the accident
   Beschrijving: string; // description
   Melder: string; // reporter
-  Latitude: number;
-  Longitude: number;
+  "Eerste tijd ter plaatse": Date,
+  "Laatste eindtijd": Date,
+  ovd: Date,
+  Latitude_van: number;
+  Longitude_van: number;
+  Latitude_tot: number;
+  Longitude_tot: number;
 };

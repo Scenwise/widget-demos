@@ -22,44 +22,44 @@ import AccidentLocationListItem from './AccidentLocationListItem';
 
 const RiskMap = () => {
   // Parse the Excel file to retrieve the accidents
-  let accidents = useRef<Array<AccidentData>>([]);
+  const [accidentData, setAccidentData] = useState<Array<AccidentData>>([]);
   const [loading, setLoading] = useState(true);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
-  const [data, setData] = useState({});
+  const [geoJSONDataPoint, setDataJSONDataPoint] = useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>();
+  const [geoJSONDataSegment, setDataJSONDataSegment] = useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>();
 
   useEffect(() => {
-    if (!map) return;
+    // if (!map) return;
     // Note: all excel files should stay in the "public" folder for them to be parsed
-    const filePath = "../../../public/accidents-excel/brabant2022.xlsx";
+    const filePath = "./accidents-excel/brabant2022.xlsx";
     const fetchData = async () => {
       const response = await fetch(filePath);
-      console.log(response);
       const data = await response.arrayBuffer();
-      console.log(data)
       const workbook = XLSX.read(data, { type: "array", cellDates: true });
       const worksheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[worksheetName];
-      // Construct the AccidentData array
+      const worksheet = workbook.Sheets[worksheetName];    
       const JSONdata = XLSX.utils.sheet_to_json(
         worksheet
       ) as Array<AccidentData>;
-      console.log(JSONdata)
-      accidents.current = JSONdata;
-      const featureCollection = featureCollectionConverter(accidents.current);
-      setData(featureCollection);
+
+      setAccidentData(JSONdata);
+      
+      const {featureCollectionPoint, featureCollectionSegment} = featureCollectionConverter(JSONdata);
+
+      setDataJSONDataPoint(featureCollectionPoint as GeoJSON.FeatureCollection<GeoJSON.Geometry>);
+      setDataJSONDataSegment(featureCollectionSegment as GeoJSON.FeatureCollection<GeoJSON.Geometry>);
       setLoading(false);
     };
     fetchData();
-
-    map.addSource('accidentsLocationsSource', {
+    
+    map?.addSource('accidentsLocationsSourcePoint', {
       type: 'geojson',
-      data: data as GeoJSON.FeatureCollection,
+      data: geoJSONDataPoint as GeoJSON.FeatureCollection,
     });
-
-    map.addLayer({
-      id: 'accidentsLayer',
+    map?.addLayer({
+      id: 'accidentsLayerPoint',
       type: 'circle',
-      source: 'accidentsLocationsSource',
+      source: 'accidentsLocationsSourcePoint',
       layout: {},
       paint: {
         'circle-color': 'red',
@@ -67,6 +67,21 @@ const RiskMap = () => {
         'circle-stroke-color': '#FFF',
         'circle-stroke-width': 2,
       },
+    });
+
+    map?.addSource('accidentsLocationsSourceSegment', {
+      type: 'geojson',
+      data: geoJSONDataSegment as GeoJSON.FeatureCollection,
+    });
+    map?.addLayer({
+      id: 'accidentsLayerSegment',
+      type: 'line',
+      source: 'accidentsLocationsSourceSegment',
+      layout: {},
+      paint: {
+        "line-color": "orange",
+        "line-width": 3
+      }
     });
   }, [map]);
 
@@ -93,43 +108,29 @@ const RiskMap = () => {
           position="sticky"
           sx={{ bgcolor: 'background.paper', top: 0, px: 2, pt: 2, zIndex: 1 }}
         >
-          <Typography variant="h6">Amsterdam Parking</Typography>
+          <Typography variant="h6">North Brabant Accidents</Typography>
         </Box>
         <List>
-          {/* <ListSubheader sx={{ top: 48, bgcolor: 'background.paper' }}>
-            Closest to you
-          </ListSubheader> */}
-
-          {/* <ListItem sx={{ pt: 0 }}>
-            <Grid container spacing={1} alignItems="stretch">
-              {locations.features.slice(0, 2).map((location) => (
-                <Grid item xs={6} key={location.Id}>
-                  <ParkingLocationHighlight
-                    name={location.properties.name}
-                    space={
-                      Number(location.properties.FreeSpaceShort) +
-                      Number(location.properties.FreeSpaceLong)
-                    }
-                    capacity={
-                      Number(location.properties.ShortCapacity) +
-                      Number(location.properties.LongCapacity)
-                    }
-                    location={location.geometry.coordinates as LngLatLike}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </ListItem> */}
-
           <ListSubheader sx={{ top: 48, bgcolor: 'background.paper' }}>
             All Accidents
           </ListSubheader>
 
-          {accidents.current.map((location) => (
+          {accidentData.map((location) => (
             <AccidentLocationListItem
               key={location.ID}
-              name={location.ID.toString()}
-              location={[location.Longitude, location.Latitude] as LngLatLike}
+              name={location.Weg}
+              location={[location.Longitude_van, location.Latitude_van] as LngLatLike}
+              zijde={location.Zijde}
+              hmpVan={location['Hmp van']}
+              hmpTot={location['Hmp tot']}
+              ovd={location.ovd?location.ovd.toTimeString(): ""}
+              Starttijd={location.Starttijd.toTimeString()}
+              Einddatum={location.Einddatum.toDateString()}
+              Eerste_tijd_ter_plaatse={location['Eerste tijd ter plaatse']?location['Eerste tijd ter plaatse'].toTimeString():""}
+              Laatste_eindtijd={location['Laatste eindtijd']?location['Laatste eindtijd'].toTimeString():""}
+              color={location['Hmp tot']?"orange":"red"}
+              Proces={location.Proces}
+              Melder={location.Melder}
             />
           ))}
         </List>
@@ -138,7 +139,7 @@ const RiskMap = () => {
 
       <Box p={1} flexGrow={1} width="60%">
         <Box sx={{ borderRadius: 6, overflow: 'hidden' }} height="100%">
-          <MapBoxContainer mapState={[map, setMap]} />
+          <MapBoxContainer mapState={[map, setMap]} location={[5.025243, 51.567082] as LngLatLike} zoomLevel={8} />
         </Box>
       </Box>
     </Stack>
