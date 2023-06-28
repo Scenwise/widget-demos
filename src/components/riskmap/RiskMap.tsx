@@ -67,39 +67,94 @@ const RiskMap = () => {
       setLoading(false);
     };
     fetchData();
+  }, []);
 
-    map?.addSource("accidentsLocationsSourcePoint", {
-      type: "geojson",
-      data: geoJSONDataPoint as GeoJSON.FeatureCollection,
-    });
-    map?.addLayer({
-      id: "accidentsLayerPoint",
-      type: "circle",
-      source: "accidentsLocationsSourcePoint",
-      layout: {},
-      paint: {
-        "circle-color": "red",
-        "circle-radius": 6,
-        "circle-stroke-color": "#FFF",
-        "circle-stroke-width": 2,
-      },
-    });
+  useEffect(() => {
+    if (!map) return;
+  
+    const addSourcesAndLayers = () => {
+      // Remove the existing sources and layers if they already exist
+      if (map.getSource("accidentsLocationsSourcePoint")) {
+        map.removeSource("accidentsLocationsSourcePoint");
+      }
+      if (map.getSource("accidentsLocationsSourceSegment")) {
+        map.removeSource("accidentsLocationsSourceSegment");
+      }
+      if (map.getLayer("accidentsLayerPoint")) {
+        map.removeLayer("accidentsLayerPoint");
+      }
+      if (map.getLayer("accidentsLayerSegment")) {
+        map.removeLayer("accidentsLayerSegment");
+      }
+  
+      // Add the sources and layers to the map
+      map.addSource("accidentsLocationsSourcePoint", {
+        type: "geojson",
+        data: geoJSONDataPoint as GeoJSON.FeatureCollection,
+      });
+      map.addLayer({
+        id: "accidentsLayerPoint",
+        type: "circle",
+        source: "accidentsLocationsSourcePoint",
+        layout: {},
+        paint: {
+          "circle-color": "red",
+          "circle-radius": 6,
+          "circle-stroke-color": "#FFF",
+          "circle-stroke-width": 2,
+        },
+      });
+  
+      map.addSource("accidentsLocationsSourceSegment", {
+        type: "geojson",
+        data: geoJSONDataSegment as GeoJSON.FeatureCollection,
+      });
+      map.addLayer({
+        id: "accidentsLayerSegment",
+        type: "line",
+        source: "accidentsLocationsSourceSegment",
+        layout: {},
+        paint: {
+          "line-color": "orange",
+          "line-width": 3,
+        },
+      });
+    };
+  
+    addSourcesAndLayers();
+  
+    return () => {
+      // Cleanup: remove the sources and layers when the component unmounts
+      if (map.getSource("accidentsLocationsSourcePoint")) {
+        map.removeSource("accidentsLocationsSourcePoint");
+      }
+      if (map.getSource("accidentsLocationsSourceSegment")) {
+        map.removeSource("accidentsLocationsSourceSegment");
+      }
+      if (map.getLayer("accidentsLayerPoint")) {
+        map.removeLayer("accidentsLayerPoint");
+      }
+      if (map.getLayer("accidentsLayerSegment")) {
+        map.removeLayer("accidentsLayerSegment");
+      }
+    };
+  }, [map, geoJSONDataPoint, geoJSONDataSegment]);
+  
+  
+  
 
-    map?.addSource("accidentsLocationsSourceSegment", {
-      type: "geojson",
-      data: geoJSONDataSegment as GeoJSON.FeatureCollection,
-    });
-    map?.addLayer({
-      id: "accidentsLayerSegment",
-      type: "line",
-      source: "accidentsLocationsSourceSegment",
-      layout: {},
-      paint: {
-        "line-color": "orange",
-        "line-width": 3,
-      },
-    });
-  }, [map]);
+  useEffect(() => {
+    const { featureCollectionPoint, featureCollectionSegment } =
+        featureCollectionConverter(filteredAccidentData);
+
+      setDataJSONDataPoint(
+        featureCollectionPoint as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+      );
+      setDataJSONDataSegment(
+        featureCollectionSegment as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+      );
+  }, [filteredAccidentData]);
+  
 
   const { flyToLocation } = useSelector(
     (state: RootState) => state.accidentsWidget
@@ -149,7 +204,7 @@ const RiskMap = () => {
           sx={{ bgcolor: "background.paper", top: 0, px: 2, pt: 2, zIndex: 1 }}
         >
           <Typography variant="h6">North Brabant Accidents</Typography>
-          <Box display="flex" alignItems="center" sx={{ width: "100%", mb: 2 }}>
+          <Box display="flex" alignItems="center" sx={{ width: "100%", mb: 2, paddingTop: 2 }}>
             <Typography variant="body2" sx={{ paddingRight: 2 }}>
               Filter by Process
             </Typography>
@@ -187,7 +242,7 @@ const RiskMap = () => {
         </Box>
 
         <List>
-          <ListSubheader sx={{ top: 40, bgcolor: "background.paper" }}>
+          <ListSubheader sx={{ top: 55, bgcolor: "background.paper" }}>
             All Accidents
           </ListSubheader>
 
