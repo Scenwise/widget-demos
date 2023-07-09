@@ -12,7 +12,6 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
 import React, { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { AccidentData } from "../../data/interfaces/AccidentData";
@@ -34,6 +33,7 @@ const RiskMap = () => {
   const [geoJSONDataSegment, setDataJSONDataSegment] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>();
   const [selectedProcesses, setSelectedProcesses] = useState<string[]>([]);
+  const [selectedRoadNames, setSelectedRoadNames] = useState<string[]>([]);
   const [filteredAccidentData, setFilteredAccidentData] = useState<
     Array<AccidentData>
   >([]);
@@ -125,17 +125,17 @@ const RiskMap = () => {
 
     return () => {
       // Cleanup: remove the sources and layers when the component unmounts
-      if (map.getSource("accidentsLocationsSourcePoint")) {
-        map.removeSource("accidentsLocationsSourcePoint");
-      }
-      if (map.getSource("accidentsLocationsSourceSegment")) {
-        map.removeSource("accidentsLocationsSourceSegment");
-      }
       if (map.getLayer("accidentsLayerPoint")) {
         map.removeLayer("accidentsLayerPoint");
       }
       if (map.getLayer("accidentsLayerSegment")) {
         map.removeLayer("accidentsLayerSegment");
+      }
+      if (map.getSource("accidentsLocationsSourcePoint")) {
+        map.removeSource("accidentsLocationsSourcePoint");
+      }
+      if (map.getSource("accidentsLocationsSourceSegment")) {
+        map.removeSource("accidentsLocationsSourceSegment");
       }
     };
   }, [map, geoJSONDataPoint, geoJSONDataSegment]);
@@ -169,20 +169,59 @@ const RiskMap = () => {
       : [event.target.value];
 
     // Check if the "Clear" option is selected
-    if (selectedValues.includes("Clear")) {
+    if (selectedValues.includes("Clear") || selectedValues.length === 0) {
       setSelectedProcesses([]);
-      setFilteredAccidentData(accidentData);
+      if(selectedRoadNames.length === 0)
+        setFilteredAccidentData(accidentData);
+      else {
+        const filteredRoadData = accidentData.filter((location) => selectedRoadNames.includes(location.Weg));
+        setFilteredAccidentData(filteredRoadData);
+      }
       return;
     }
 
     setSelectedProcesses(selectedValues);
 
-    // Filter the accident data based on the selected processes
+    // Filter the accident data based on the selected processes and road names
     const filteredData =
-      selectedValues.length === 0
-        ? accidentData // Show all accidents if no processes are selected
-        : accidentData.filter((location) =>
-            selectedValues.includes(location.Proces)
+      selectedRoadNames.length === 0
+        ? accidentData.filter((location) => selectedValues.includes(location.Proces)) // Show all accidents if no processes or road names are selected
+        : accidentData.filter(
+            (location) =>
+              selectedValues.includes(location.Proces) &&
+              selectedRoadNames.includes(location.Weg)
+          );
+
+    setFilteredAccidentData(filteredData);
+  };
+
+  const handleRoadNameSelection = (event: SelectChangeEvent<string[]>) => {
+    const selectedValues = Array.isArray(event.target.value)
+      ? event.target.value
+      : [event.target.value];
+
+    // Check if the "Clear" option is selected
+    if (selectedValues.includes("Clear") || selectedValues.length === 0) {
+      setSelectedRoadNames([]);
+      if(selectedProcesses.length === 0)
+        setFilteredAccidentData(accidentData);
+      else {
+        const filteredProcessData = accidentData.filter((location) => selectedProcesses.includes(location.Proces));
+        setFilteredAccidentData(filteredProcessData);
+      }
+      return;
+    }
+
+    setSelectedRoadNames(selectedValues);
+
+    // Filter the accident data based on the selected processes and road names
+    const filteredData =
+      selectedProcesses.length === 0
+        ? accidentData.filter((location) => selectedValues.includes(location.Weg)) // Show all accidents if no processes or road names are selected
+        : accidentData.filter(
+            (location) =>
+              selectedProcesses.includes(location.Proces) &&
+              selectedValues.includes(location.Weg)
           );
 
     setFilteredAccidentData(filteredData);
@@ -200,12 +239,15 @@ const RiskMap = () => {
           sx={{ bgcolor: "background.paper", top: 0, px: 2, pt: 2, zIndex: 1 }}
         >
           <Typography variant="h6">North Brabant Accidents</Typography>
-          <Box
+        </Box>
+
+        <List>
+        <Box
             display="flex"
             alignItems="center"
-            sx={{ width: "100%", mb: 2, paddingTop: 2 }}
+            sx={{ width: "100%", paddingTop: 1 }}
           >
-            <Typography variant="body2" sx={{ paddingRight: 2 }}>
+            <Typography variant="body2" sx={{width: "20%", paddingLeft: 2, paddingRight: 1}}>
               Filter by Process
             </Typography>
             <Select
@@ -239,10 +281,46 @@ const RiskMap = () => {
               ))}
             </Select>
           </Box>
-        </Box>
-
-        <List>
-          <ListSubheader sx={{ top: 55, bgcolor: "background.paper" }}>
+          <Box
+            display="flex"
+            alignItems="flex-start"
+            sx={{ width: "100%"}}
+          >
+            <Typography variant="body2" sx={{width: "20%", paddingLeft: 2, paddingRight: 1}}>
+              Filter by Road
+            </Typography>
+            <Select
+              multiple
+              value={selectedRoadNames}
+              onChange={handleRoadNameSelection}
+              renderValue={(selected) =>
+                (selected as string[]).join(", ").length > 20
+                  ? `${(selected as string[]).join(", ").slice(0, 20)}...`
+                  : (selected as string[]).join(", ")
+              }
+              sx={{
+                minWidth: 200,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                height: 30,
+                padding: 0,
+              }}
+              MenuProps={{
+                sx: { maxHeight: 200 },
+              }}
+            >
+              <MenuItem value="Clear">Clear selections</MenuItem>
+              {Array.from(
+                new Set(accidentData.map((location) => location.Weg))
+              ).map((roadName) => (
+                <MenuItem key={roadName} value={roadName}>
+                  {roadName}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
+          <ListSubheader sx={{ top: 45, bgcolor: "background.paper" }}>
             All Accidents
           </ListSubheader>
 
