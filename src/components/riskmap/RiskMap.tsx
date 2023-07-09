@@ -12,6 +12,10 @@ import {
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { AccidentData } from "../../data/interfaces/AccidentData";
@@ -32,8 +36,15 @@ const RiskMap = () => {
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>();
   const [geoJSONDataSegment, setDataJSONDataSegment] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>();
+
   const [selectedProcesses, setSelectedProcesses] = useState<string[]>([]);
   const [selectedRoadNames, setSelectedRoadNames] = useState<string[]>([]);
+  //TODO: make start and end time the start and end times of the accidents
+  const [selectedStartTime, setSelectedStartTime] =
+    React.useState<Dayjs | null>(dayjs());
+  const [selectedEndTime, setSelectedEndTime] = React.useState<Dayjs | null>(
+    dayjs()
+  );
   const [filteredAccidentData, setFilteredAccidentData] = useState<
     Array<AccidentData>
   >([]);
@@ -163,12 +174,17 @@ const RiskMap = () => {
     map.flyTo({ center: flyToLocation, zoom: 14 });
   }, [map, flyToLocation]);
 
+  /**
+   * Process filtering handle. Collects the keywords selected by the user and filters the processes by them.
+   * The processes array will be used to filter the actual accidents.
+   * @param event the selected processes
+   */
   const handleProcessSelection = (event: SelectChangeEvent<string[]>) => {
     const selectedValues = Array.isArray(event.target.value)
       ? event.target.value
       : [event.target.value];
 
-    // Check if the "Clear" option is selected
+    // Check if the "Clear" option is selected or if there are no selected values
     if (selectedValues.includes("Clear") || selectedValues.length === 0) {
       setSelectedProcesses([]);
       return;
@@ -177,12 +193,17 @@ const RiskMap = () => {
     setSelectedProcesses(selectedValues);
   };
 
+  /**
+   * Road name filtering handle. Collects the keywords selected by the user and filters the road names by them.
+   * The road names array will be used to filter the actual accidents.
+   * @param event the selected road names
+   */
   const handleRoadNameSelection = (event: SelectChangeEvent<string[]>) => {
     const selectedValues = Array.isArray(event.target.value)
       ? event.target.value
       : [event.target.value];
 
-    // Check if the "Clear" option is selected
+    // Check if the "Clear" option is selected or if there are no selected values
     if (selectedValues.includes("Clear") || selectedValues.length === 0) {
       setSelectedRoadNames([]);
       return;
@@ -191,29 +212,31 @@ const RiskMap = () => {
     setSelectedRoadNames(selectedValues);
   };
 
+  const handleTimeSelection = (timeframe: Dayjs | null) => {
+    //TODO: add filtering by timeframe
+  };
+
+  /**
+   * Main filtering hook. At any change of the selection arrays, the hook recomputes the filtered data.
+   * This makes it trivial to add new filtering functions later on.
+   */
   useEffect(() => {
-    // Filter the accident data based on the selected processes and road names
-    let filteredData = accidentData;
     if (selectedProcesses.length === 0 && selectedRoadNames.length === 0) {
-      setFilteredAccidentData(filteredData);
+      setFilteredAccidentData(accidentData);
       return;
-    } else if (selectedProcesses.length === 0) {
-      filteredData = accidentData.filter((location) =>
-        selectedRoadNames.includes(location.Weg)
-      );
-    } else if (selectedRoadNames.length === 0) {
-      filteredData = accidentData.filter((location) =>
-        selectedProcesses.includes(location.Proces)
-      );
-    } else {
-      filteredData = accidentData.filter(
-        (location) =>
-          selectedProcesses.includes(location.Proces) &&
-          selectedRoadNames.includes(location.Weg)
-      );
     }
+    // Filter the accident data based on the selected processes and road names
+    const filteredData = accidentData.filter(
+      (location) =>
+        (selectedProcesses.length === 0
+          ? true
+          : selectedProcesses.includes(location.Proces)) &&
+        (selectedRoadNames.length === 0
+          ? true
+          : selectedRoadNames.includes(location.Weg))
+    );
     setFilteredAccidentData(filteredData);
-  }, [selectedProcesses, selectedRoadNames]);
+  }, [accidentData, selectedProcesses, selectedRoadNames]);
 
   // To access the accidents, use accidents.current
   return (
@@ -309,6 +332,22 @@ const RiskMap = () => {
                 </MenuItem>
               ))}
             </Select>
+          </Box>
+          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 0.6}}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  sx={{ width: "49%"}}
+                  label="Start time"
+                  value={selectedStartTime}
+                  onChange={handleTimeSelection}
+                />
+                <DatePicker
+                  sx={{ width: "49%"}}
+                  label="End time"
+                  value={selectedEndTime}
+                  onChange={handleTimeSelection}
+                />
+              </LocalizationProvider>
           </Box>
           <ListSubheader sx={{ top: 45, bgcolor: "background.paper" }}>
             All Accidents
