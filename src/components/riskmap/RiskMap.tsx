@@ -333,21 +333,21 @@ const RiskMap = () => {
               ))}
             </Select>
           </Box>
-          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 0.6}}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  sx={{ width: "49%"}}
-                  label="Start time"
-                  value={selectedStartTime}
-                  onChange={handleTimeSelection}
-                />
-                <DatePicker
-                  sx={{ width: "49%"}}
-                  label="End time"
-                  value={selectedEndTime}
-                  onChange={handleTimeSelection}
-                />
-              </LocalizationProvider>
+          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 0.6 }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                sx={{ width: "49%" }}
+                label="Start time"
+                value={selectedStartTime}
+                onChange={handleTimeSelection}
+              />
+              <DatePicker
+                sx={{ width: "49%" }}
+                label="End time"
+                value={selectedEndTime}
+                onChange={handleTimeSelection}
+              />
+            </LocalizationProvider>
           </Box>
           <ListSubheader sx={{ top: 45, bgcolor: "background.paper" }}>
             All Accidents
