@@ -171,28 +171,10 @@ const RiskMap = () => {
     // Check if the "Clear" option is selected
     if (selectedValues.includes("Clear") || selectedValues.length === 0) {
       setSelectedProcesses([]);
-      if(selectedRoadNames.length === 0)
-        setFilteredAccidentData(accidentData);
-      else {
-        const filteredRoadData = accidentData.filter((location) => selectedRoadNames.includes(location.Weg));
-        setFilteredAccidentData(filteredRoadData);
-      }
       return;
     }
 
     setSelectedProcesses(selectedValues);
-
-    // Filter the accident data based on the selected processes and road names
-    const filteredData =
-      selectedRoadNames.length === 0
-        ? accidentData.filter((location) => selectedValues.includes(location.Proces)) // Show all accidents if no processes or road names are selected
-        : accidentData.filter(
-            (location) =>
-              selectedValues.includes(location.Proces) &&
-              selectedRoadNames.includes(location.Weg)
-          );
-
-    setFilteredAccidentData(filteredData);
   };
 
   const handleRoadNameSelection = (event: SelectChangeEvent<string[]>) => {
@@ -203,29 +185,35 @@ const RiskMap = () => {
     // Check if the "Clear" option is selected
     if (selectedValues.includes("Clear") || selectedValues.length === 0) {
       setSelectedRoadNames([]);
-      if(selectedProcesses.length === 0)
-        setFilteredAccidentData(accidentData);
-      else {
-        const filteredProcessData = accidentData.filter((location) => selectedProcesses.includes(location.Proces));
-        setFilteredAccidentData(filteredProcessData);
-      }
       return;
     }
 
     setSelectedRoadNames(selectedValues);
-
-    // Filter the accident data based on the selected processes and road names
-    const filteredData =
-      selectedProcesses.length === 0
-        ? accidentData.filter((location) => selectedValues.includes(location.Weg)) // Show all accidents if no processes or road names are selected
-        : accidentData.filter(
-            (location) =>
-              selectedProcesses.includes(location.Proces) &&
-              selectedValues.includes(location.Weg)
-          );
-
-    setFilteredAccidentData(filteredData);
   };
+
+  useEffect(() => {
+    // Filter the accident data based on the selected processes and road names
+    let filteredData = accidentData;
+    if (selectedProcesses.length === 0 && selectedRoadNames.length === 0) {
+      setFilteredAccidentData(filteredData);
+      return;
+    } else if (selectedProcesses.length === 0) {
+      filteredData = accidentData.filter((location) =>
+        selectedRoadNames.includes(location.Weg)
+      );
+    } else if (selectedRoadNames.length === 0) {
+      filteredData = accidentData.filter((location) =>
+        selectedProcesses.includes(location.Proces)
+      );
+    } else {
+      filteredData = accidentData.filter(
+        (location) =>
+          selectedProcesses.includes(location.Proces) &&
+          selectedRoadNames.includes(location.Weg)
+      );
+    }
+    setFilteredAccidentData(filteredData);
+  }, [selectedProcesses, selectedRoadNames]);
 
   // To access the accidents, use accidents.current
   return (
@@ -242,12 +230,15 @@ const RiskMap = () => {
         </Box>
 
         <List>
-        <Box
+          <Box
             display="flex"
             alignItems="center"
-            sx={{ width: "100%", paddingTop: 1 }}
+            sx={{ width: "100%", paddingTop: 1, paddingBottom: 1 }}
           >
-            <Typography variant="body2" sx={{width: "20%", paddingLeft: 2, paddingRight: 1}}>
+            <Typography
+              variant="body2"
+              sx={{ width: "20%", paddingLeft: 2, paddingRight: 1 }}
+            >
               Filter by Process
             </Typography>
             <Select
@@ -281,12 +272,11 @@ const RiskMap = () => {
               ))}
             </Select>
           </Box>
-          <Box
-            display="flex"
-            alignItems="flex-start"
-            sx={{ width: "100%"}}
-          >
-            <Typography variant="body2" sx={{width: "20%", paddingLeft: 2, paddingRight: 1}}>
+          <Box display="flex" alignItems="flex-start" sx={{ width: "100%" }}>
+            <Typography
+              variant="body2"
+              sx={{ width: "20%", paddingLeft: 2, paddingRight: 1 }}
+            >
               Filter by Road
             </Typography>
             <Select
