@@ -11,6 +11,7 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  CircularProgress,
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -54,6 +55,7 @@ const RiskMap = () => {
     // Note: all excel files should stay in the "public" folder for them to be parsed
     const filePath = "./accidents-excel/brabant2022.xlsx";
     const fetchData = async () => {
+      // Parse the data from the Excel file
       const response = await fetch(filePath);
       const data = await response.arrayBuffer();
       const workbook = XLSX.read(data, { type: "array", cellDates: true });
@@ -63,9 +65,21 @@ const RiskMap = () => {
         worksheet
       ) as Array<AccidentData>;
 
+      // Set the accident data
       setAccidentData(JSONdata);
       setFilteredAccidentData(JSONdata);
 
+      // Set the start time for the accidents as the lowest start time
+      const startTimes = JSONdata.map((x) => x.Starttijd.getTime());
+      const minStart = new Date(Math.min(...startTimes));
+      setSelectedStartTime(dayjs(minStart));
+
+      // Set the end time for the accidents as the highest end time
+      const endTimes = JSONdata.map((x) => x.Einddatum.getTime());
+      const maxEnd = new Date(Math.max(...endTimes));
+      setSelectedEndTime(dayjs(maxEnd));
+
+      // Set the map data
       const { featureCollectionPoint, featureCollectionSegment } =
         featureCollectionConverter(JSONdata);
 
@@ -82,7 +96,6 @@ const RiskMap = () => {
 
   useEffect(() => {
     if (!map) return;
-
     const addSourcesAndLayers = () => {
       // Remove the existing sources and layers if they already exist
       if (map.getSource("accidentsLocationsSourcePoint")) {
@@ -151,6 +164,9 @@ const RiskMap = () => {
     };
   }, [map, geoJSONDataPoint, geoJSONDataSegment]);
 
+  /**
+   * Hook for displaying the filtered data on the map.
+   */
   useEffect(() => {
     const { featureCollectionPoint, featureCollectionSegment } =
       featureCollectionConverter(filteredAccidentData);
@@ -167,6 +183,9 @@ const RiskMap = () => {
     (state: RootState) => state.accidentsWidget
   );
 
+  /**
+   * Hook for zooming on a specific accident when the user selects it.
+   */
   useEffect(() => {
     if (!map) return;
     if (!flyToLocation) return;
@@ -212,15 +231,12 @@ const RiskMap = () => {
     setSelectedRoadNames(selectedValues);
   };
 
-  const handleTimeSelection = (timeframe: Dayjs | null) => {
-    //TODO: add filtering by timeframe
-  };
-
   /**
    * Main filtering hook. At any change of the selection arrays, the hook recomputes the filtered data.
    * This makes it trivial to add new filtering functions later on.
    */
   useEffect(() => {
+    //TODO: filter based on start and end time
     if (selectedProcesses.length === 0 && selectedRoadNames.length === 0) {
       setFilteredAccidentData(accidentData);
       return;
@@ -236,7 +252,13 @@ const RiskMap = () => {
           : selectedRoadNames.includes(location.Weg))
     );
     setFilteredAccidentData(filteredData);
-  }, [accidentData, selectedProcesses, selectedRoadNames]);
+  }, [
+    accidentData,
+    selectedProcesses,
+    selectedRoadNames,
+    selectedStartTime,
+    selectedEndTime,
+  ]);
 
   // To access the accidents, use accidents.current
   return (
@@ -247,12 +269,34 @@ const RiskMap = () => {
       >
         <Box
           position="sticky"
-          sx={{ bgcolor: "background.paper", top: 0, px: 2, pt: 2, zIndex: 1 }}
+          sx={{
+            bgcolor: "background.paper",
+            top: 0,
+            px: 2,
+            pt: 2,
+            zIndex: 1,
+          }}
         >
           <Typography variant="h6">North Brabant Accidents</Typography>
         </Box>
 
         <List>
+          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 0.6 }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                sx={{ width: "49%", zIndex: 0 }}
+                label="Start time"
+                value={selectedStartTime}
+                onChange={(newValue) => setSelectedStartTime(newValue)}
+              />
+              <DatePicker
+                sx={{ width: "49%", zIndex: 0 }}
+                label="End time"
+                value={selectedEndTime}
+                onChange={(newValue) => setSelectedEndTime(newValue)}
+              />
+            </LocalizationProvider>
+          </Box>
           <Box
             display="flex"
             alignItems="center"
@@ -333,22 +377,6 @@ const RiskMap = () => {
               ))}
             </Select>
           </Box>
-          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 0.6 }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                sx={{ width: "49%" }}
-                label="Start time"
-                value={selectedStartTime}
-                onChange={handleTimeSelection}
-              />
-              <DatePicker
-                sx={{ width: "49%" }}
-                label="End time"
-                value={selectedEndTime}
-                onChange={handleTimeSelection}
-              />
-            </LocalizationProvider>
-          </Box>
           <ListSubheader sx={{ top: 45, bgcolor: "background.paper" }}>
             All Accidents
           </ListSubheader>
@@ -396,5 +424,4 @@ const RiskMap = () => {
     </Stack>
   );
 };
-
 export default RiskMap;
