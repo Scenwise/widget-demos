@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Box,
-  Grid,
   List,
-  ListItem,
   ListSubheader,
   Paper,
   Stack,
@@ -11,7 +9,6 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
-  CircularProgress,
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -20,7 +17,6 @@ import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { AccidentData } from "../../data/interfaces/AccidentData";
-import { set } from "immer/dist/internal";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { LngLatLike } from "mapbox-gl";
@@ -236,20 +232,27 @@ const RiskMap = () => {
    * This makes it trivial to add new filtering functions later on.
    */
   useEffect(() => {
-    //TODO: filter based on start and end time
-    if (selectedProcesses.length === 0 && selectedRoadNames.length === 0) {
-      setFilteredAccidentData(accidentData);
-      return;
-    }
+    let filteredData = accidentData;
     // Filter the accident data based on the selected processes and road names
-    const filteredData = accidentData.filter(
+    if (selectedProcesses.length !== 0 || selectedRoadNames.length !== 0) {
+      filteredData = accidentData.filter(
+        (location) =>
+          (selectedProcesses.length === 0
+            ? true
+            : selectedProcesses.includes(location.Proces)) &&
+          (selectedRoadNames.length === 0
+            ? true
+            : selectedRoadNames.includes(location.Weg))
+      );
+    }
+
+    // Filter based on start and end time
+    filteredData = filteredData.filter(
       (location) =>
-        (selectedProcesses.length === 0
-          ? true
-          : selectedProcesses.includes(location.Proces)) &&
-        (selectedRoadNames.length === 0
-          ? true
-          : selectedRoadNames.includes(location.Weg))
+        location.Starttijd.getTime() >=
+          (selectedStartTime === null ? 0 : selectedStartTime.unix()) * 1000 &&
+        location.Starttijd.getTime() <=
+          (selectedEndTime === null ? 0 : selectedEndTime.unix()) * 1000
     );
     setFilteredAccidentData(filteredData);
   }, [
@@ -288,12 +291,14 @@ const RiskMap = () => {
                 label="Start time"
                 value={selectedStartTime}
                 onChange={(newValue) => setSelectedStartTime(newValue)}
+                format="DD.MM.YYYY"
               />
               <DatePicker
                 sx={{ width: "49%", zIndex: 0 }}
                 label="End time"
                 value={selectedEndTime}
                 onChange={(newValue) => setSelectedEndTime(newValue)}
+                format="DD.MM.YYYY"
               />
             </LocalizationProvider>
           </Box>
@@ -332,11 +337,13 @@ const RiskMap = () => {
               <MenuItem value="Clear">Clear selections</MenuItem>
               {Array.from(
                 new Set(accidentData.map((location) => location.Proces))
-              ).map((proces) => (
-                <MenuItem key={proces} value={proces}>
-                  {proces}
-                </MenuItem>
-              ))}
+              )
+                .sort()
+                .map((proces) => (
+                  <MenuItem key={proces} value={proces}>
+                    {proces}
+                  </MenuItem>
+                ))}
             </Select>
           </Box>
           <Box display="flex" alignItems="flex-start" sx={{ width: "100%" }}>
@@ -368,13 +375,13 @@ const RiskMap = () => {
               }}
             >
               <MenuItem value="Clear">Clear selections</MenuItem>
-              {Array.from(
-                new Set(accidentData.map((location) => location.Weg))
-              ).map((roadName) => (
-                <MenuItem key={roadName} value={roadName}>
-                  {roadName}
-                </MenuItem>
-              ))}
+              {Array.from(new Set(accidentData.map((location) => location.Weg)))
+                .sort()
+                .map((roadName) => (
+                  <MenuItem key={roadName} value={roadName}>
+                    {roadName}
+                  </MenuItem>
+                ))}
             </Select>
           </Box>
           <ListSubheader sx={{ top: 45, bgcolor: "background.paper" }}>
