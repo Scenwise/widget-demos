@@ -9,12 +9,13 @@ import {
   Select,
   MenuItem,
   SelectChangeEvent,
+  Switch,
 } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { Dayjs } from "dayjs";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { AccidentData } from "../../data/interfaces/AccidentData";
 import { useSelector } from "react-redux";
@@ -26,6 +27,7 @@ import AccidentLocationListItem from "./AccidentLocationListItem";
 
 const RiskMap = () => {
   // Parse the Excel file to retrieve the accidents
+  const filePath = "./accidents-excel/brabant2022.xlsx";
   const [accidentData, setAccidentData] = useState<Array<AccidentData>>([]);
   const [loading, setLoading] = useState(true);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -33,10 +35,11 @@ const RiskMap = () => {
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>();
   const [geoJSONDataSegment, setDataJSONDataSegment] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>();
+  const [geoJSONDataHeatmap, setDataHeatmap] =
+    useState<GeoJSON.FeatureCollection<GeoJSON.Geometry>>();
 
   const [selectedProcesses, setSelectedProcesses] = useState<string[]>([]);
   const [selectedRoadNames, setSelectedRoadNames] = useState<string[]>([]);
-  //TODO: make start and end time the start and end times of the accidents
   const [selectedStartTime, setSelectedStartTime] =
     React.useState<Dayjs | null>(dayjs());
   const [selectedEndTime, setSelectedEndTime] = React.useState<Dayjs | null>(
@@ -45,11 +48,12 @@ const RiskMap = () => {
   const [filteredAccidentData, setFilteredAccidentData] = useState<
     Array<AccidentData>
   >([]);
+  const [heatmapVisible, setHeatmapVisible] = useState(true);
+  const [pointsVisible, setPointsVisible] = useState(true);
 
   useEffect(() => {
     // if (!map) return;
     // Note: all excel files should stay in the "public" folder for them to be parsed
-    const filePath = "./accidents-excel/brabant2022.xlsx";
     const fetchData = async () => {
       // Parse the data from the Excel file
       const response = await fetch(filePath);
@@ -76,14 +80,20 @@ const RiskMap = () => {
       setSelectedEndTime(dayjs(maxEnd));
 
       // Set the map data
-      const { featureCollectionPoint, featureCollectionSegment } =
-        featureCollectionConverter(JSONdata);
+      const {
+        featureCollectionPoint,
+        featureCollectionSegment,
+        fullFeatureCollection,
+      } = featureCollectionConverter(JSONdata);
 
       setDataJSONDataPoint(
         featureCollectionPoint as GeoJSON.FeatureCollection<GeoJSON.Geometry>
       );
       setDataJSONDataSegment(
         featureCollectionSegment as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+      );
+      setDataHeatmap(
+        fullFeatureCollection as GeoJSON.FeatureCollection<GeoJSON.Geometry>
       );
       setLoading(false);
     };
@@ -94,51 +104,134 @@ const RiskMap = () => {
     if (!map) return;
     const addSourcesAndLayers = () => {
       // Remove the existing sources and layers if they already exist
-      if (map.getSource("accidentsLocationsSourcePoint")) {
-        map.removeSource("accidentsLocationsSourcePoint");
-      }
-      if (map.getSource("accidentsLocationsSourceSegment")) {
-        map.removeSource("accidentsLocationsSourceSegment");
-      }
       if (map.getLayer("accidentsLayerPoint")) {
         map.removeLayer("accidentsLayerPoint");
       }
       if (map.getLayer("accidentsLayerSegment")) {
         map.removeLayer("accidentsLayerSegment");
       }
+      if (map.getLayer("accidentsHeatmap")) {
+        map.removeLayer("accidentsHeatmap");
+      }
+      if (map.getSource("accidentsLocationsSourcePoint")) {
+        map.removeSource("accidentsLocationsSourcePoint");
+      }
+      if (map.getSource("accidentsLocationsSourceSegment")) {
+        map.removeSource("accidentsLocationsSourceSegment");
+      }
+      if (map.getSource("accidentsSourceHeatmap")) {
+        map.removeSource("accidentsSourceHeatmap");
+      }
 
       // Add the sources and layers to the map
-      map.addSource("accidentsLocationsSourcePoint", {
-        type: "geojson",
-        data: geoJSONDataPoint as GeoJSON.FeatureCollection,
-      });
-      map.addLayer({
-        id: "accidentsLayerPoint",
-        type: "circle",
-        source: "accidentsLocationsSourcePoint",
-        layout: {},
-        paint: {
-          "circle-color": "red",
-          "circle-radius": 6,
-          "circle-stroke-color": "#FFF",
-          "circle-stroke-width": 2,
-        },
-      });
+      if (pointsVisible) {
+        map.addSource("accidentsLocationsSourcePoint", {
+          type: "geojson",
+          data: geoJSONDataPoint as GeoJSON.FeatureCollection,
+        });
+        map.addLayer({
+          id: "accidentsLayerPoint",
+          type: "circle",
+          source: "accidentsLocationsSourcePoint",
+          layout: {},
+          paint: {
+            "circle-color": "red",
+            "circle-radius": 6,
+            "circle-stroke-color": "#FFF",
+            "circle-stroke-width": 2,
+          },
+        });
 
-      map.addSource("accidentsLocationsSourceSegment", {
-        type: "geojson",
-        data: geoJSONDataSegment as GeoJSON.FeatureCollection,
-      });
-      map.addLayer({
-        id: "accidentsLayerSegment",
-        type: "line",
-        source: "accidentsLocationsSourceSegment",
-        layout: {},
-        paint: {
-          "line-color": "orange",
-          "line-width": 3,
-        },
-      });
+        map.addSource("accidentsLocationsSourceSegment", {
+          type: "geojson",
+          data: geoJSONDataSegment as GeoJSON.FeatureCollection,
+        });
+        map.addLayer({
+          id: "accidentsLayerSegment",
+          type: "line",
+          source: "accidentsLocationsSourceSegment",
+          layout: {},
+          paint: {
+            "line-color": "orange",
+            "line-width": 3,
+          },
+        });
+      }
+      // Add heatmap
+      if (heatmapVisible) {
+        map.addSource("accidentsSourceHeatmap", {
+          type: "geojson",
+          data: geoJSONDataHeatmap as GeoJSON.FeatureCollection,
+        });
+        map.addLayer({
+          id: "accidentsHeatmap",
+          type: "heatmap",
+          source: "accidentsSourceHeatmap",
+          paint: {
+            // All points have the same weight (equal importance)
+            "heatmap-weight": 1,
+            // Increase the heatmap color weight weight by zoom level
+            // heatmap-intensity is a multiplier on top of heatmap-weight
+            "heatmap-intensity": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              0,
+              0.3,
+              9,
+              2,
+            ],
+            "heatmap-color": [
+              "interpolate",
+              ["linear"],
+              ["heatmap-density"],
+              0,
+              "rgba(0, 0, 255, 0)", // Transparent blue for density 0
+              0.1,
+              "#0000FF", // Pure blue for density 0.1
+              0.2,
+              "#00FFFF", // Cyan for density 0.2
+              0.3,
+              "#00FF7F", // Spring Green for density 0.3
+              0.4,
+              "#00FF00", // Pure green for density 0.4
+              0.5,
+              "#7FFF00", // Chartreuse for density 0.5
+              0.6,
+              "#ADFF2F", // Green-yellow for density 0.6
+              0.7,
+              "#FFFF00", // Yellow for density 0.7
+              0.8,
+              "#FFA500", // Orange for density 0.8
+              0.9,
+              "#FF4500", // Red-orange for density 0.9
+              1,
+              "#FF0000", // Pure red for density 1
+            ],
+
+            // Adjust the heatmap radius by zoom level
+            "heatmap-radius": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              0,
+              1,
+              9,
+              20,
+            ],
+            // Transition from heatmap to circle layer by zoom level
+            "heatmap-opacity": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              6,
+              1,
+              9,
+              0.3,
+            ],
+          },
+        });
+      }
     };
 
     addSourcesAndLayers();
@@ -151,27 +244,46 @@ const RiskMap = () => {
       if (map.getLayer("accidentsLayerSegment")) {
         map.removeLayer("accidentsLayerSegment");
       }
+      if (map.getLayer("accidentsHeatmap")) {
+        map.removeLayer("accidentsHeatmap");
+      }
       if (map.getSource("accidentsLocationsSourcePoint")) {
         map.removeSource("accidentsLocationsSourcePoint");
       }
       if (map.getSource("accidentsLocationsSourceSegment")) {
         map.removeSource("accidentsLocationsSourceSegment");
       }
+      if (map.getSource("accidentsSourceHeatmap")) {
+        map.removeSource("accidentsSourceHeatmap");
+      }
     };
-  }, [map, geoJSONDataPoint, geoJSONDataSegment]);
+  }, [
+    map,
+    geoJSONDataPoint,
+    geoJSONDataSegment,
+    geoJSONDataHeatmap,
+    heatmapVisible,
+    pointsVisible,
+  ]);
 
   /**
    * Hook for displaying the filtered data on the map.
    */
   useEffect(() => {
-    const { featureCollectionPoint, featureCollectionSegment } =
-      featureCollectionConverter(filteredAccidentData);
+    const {
+      featureCollectionPoint,
+      featureCollectionSegment,
+      fullFeatureCollection,
+    } = featureCollectionConverter(filteredAccidentData);
 
     setDataJSONDataPoint(
       featureCollectionPoint as GeoJSON.FeatureCollection<GeoJSON.Geometry>
     );
     setDataJSONDataSegment(
       featureCollectionSegment as GeoJSON.FeatureCollection<GeoJSON.Geometry>
+    );
+    setDataHeatmap(
+      fullFeatureCollection as GeoJSON.FeatureCollection<GeoJSON.Geometry>
     );
   }, [filteredAccidentData]);
 
@@ -227,11 +339,19 @@ const RiskMap = () => {
     setSelectedRoadNames(selectedValues);
   };
 
+  const handleHeatmapSwitchChange = (event: any) => {
+    setHeatmapVisible(event.target.checked);
+  };
+
+  const handlePointsSwitchChange = (event: any) => {
+    setPointsVisible(event.target.checked);
+  };
+
   /**
    * Main filtering hook. At any change of the selection arrays, the hook recomputes the filtered data.
    * This makes it trivial to add new filtering functions later on.
    */
-  useEffect(() => {
+  useMemo(() => {
     let filteredData = accidentData;
     // Filter the accident data based on the selected processes and road names
     if (selectedProcesses.length !== 0 || selectedRoadNames.length !== 0) {
@@ -301,6 +421,30 @@ const RiskMap = () => {
                 format="DD.MM.YYYY"
               />
             </LocalizationProvider>
+          </Box>
+          <Box display="flex" alignItems="flex-start" sx={{ width: "100%" }}>
+            <Box
+              display="flex"
+              alignItems="center"
+              sx={{ paddingLeft: 2.5, width: "40%" }}
+            >
+              <Typography variant="body2">Points</Typography>
+              <Switch
+                checked={pointsVisible}
+                onChange={handlePointsSwitchChange}
+              />
+            </Box>
+            <Box
+              display="flex"
+              alignItems="center"
+              sx={{ paddingLeft: 2.5, width: "40%" }}
+            >
+              <Typography variant="body2">Heatmap</Typography>
+              <Switch
+                checked={heatmapVisible}
+                onChange={handleHeatmapSwitchChange}
+              />
+            </Box>
           </Box>
           <Box
             display="flex"
