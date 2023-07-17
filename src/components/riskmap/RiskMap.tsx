@@ -117,6 +117,7 @@ const RiskMap = () => {
         paint: {
           "line-color": "orange",
           "line-width": 3,
+          "line-opacity": 1
         },
       });
     };
