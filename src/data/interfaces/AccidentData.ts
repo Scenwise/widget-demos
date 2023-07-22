@@ -19,4 +19,5 @@ export type AccidentData = {
   Longitude_van: number;
   Latitude_tot: number;
   Longitude_tot: number;
+  Points: string;
 };
