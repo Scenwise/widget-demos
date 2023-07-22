@@ -43,7 +43,7 @@ const AccidentLocationListItem = ({
   const dispatch = useDispatch();
 
   return (
-    <div style={{ width: 290}}>
+    <div style={{ width: '100%'}}>
       {" "}
       {/* Set the desired width */}
       <ListItem button onClick={() => dispatch(updateFlyToLocation(location))} sx={{ alignItems: 'flex-start' }} >

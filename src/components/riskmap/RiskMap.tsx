@@ -154,7 +154,7 @@ const RiskMap = () => {
           paint: {
             "line-color": "orange",
             "line-width": 3,
-            "line-opacity": 1
+            "line-opacity": 1,
           },
         });
       }
@@ -386,7 +386,7 @@ const RiskMap = () => {
 
   // To access the accidents, use accidents.current
   return (
-    <Stack direction="row" alignItems="stretch" height={400}>
+    <Stack direction="row" alignItems="stretch" height={500} width={1000}>
       <Paper
         elevation={0}
         sx={{ width: "40%", position: "relative", overflow: "auto" }}
@@ -412,14 +412,14 @@ const RiskMap = () => {
                 label="Start time"
                 value={selectedStartTime}
                 onChange={(newValue) => setSelectedStartTime(newValue)}
-                format="DD.MM.YYYY"
+                format="DD MMM YYYY"
               />
               <DatePicker
                 sx={{ width: "49%", zIndex: 0 }}
                 label="End time"
                 value={selectedEndTime}
                 onChange={(newValue) => setSelectedEndTime(newValue)}
-                format="DD.MM.YYYY"
+                format="DD MMM YYYY"
               />
             </LocalizationProvider>
           </Box>
@@ -427,20 +427,16 @@ const RiskMap = () => {
             <Box
               display="flex"
               alignItems="center"
-              sx={{ paddingLeft: 2.5, width: "40%" }}
+              sx={{ paddingLeft: 3, width: "50%" }}
             >
-              <Typography variant="body2">Points</Typography>
+              <Typography variant="body2">Show Points</Typography>
               <Switch
                 checked={pointsVisible}
                 onChange={handlePointsSwitchChange}
               />
             </Box>
-            <Box
-              display="flex"
-              alignItems="center"
-              sx={{ paddingLeft: 2.5, width: "40%" }}
-            >
-              <Typography variant="body2">Heatmap</Typography>
+            <Box display="flex" alignItems="center" sx={{ width: "50%" }}>
+              <Typography variant="body2">Show Heatmap</Typography>
               <Switch
                 checked={heatmapVisible}
                 onChange={handleHeatmapSwitchChange}
@@ -450,11 +446,11 @@ const RiskMap = () => {
           <Box
             display="flex"
             alignItems="center"
-            sx={{ width: "100%", paddingTop: 1, paddingBottom: 1 }}
+            sx={{ width: "100%", paddingBottom: 1 }}
           >
             <Typography
               variant="body2"
-              sx={{ width: "20%", paddingLeft: 2, paddingRight: 1 }}
+              sx={{ width: "30%", paddingLeft: 3, paddingRight: 1 }}
             >
               Filter by Process
             </Typography>
@@ -491,10 +487,10 @@ const RiskMap = () => {
                 ))}
             </Select>
           </Box>
-          <Box display="flex" alignItems="flex-start" sx={{ width: "100%" }}>
+          <Box display="flex" alignItems="center" sx={{ width: "100%" }}>
             <Typography
               variant="body2"
-              sx={{ width: "20%", paddingLeft: 2, paddingRight: 1 }}
+              sx={{ width: "30%", paddingLeft: 3, paddingRight: 1 }}
             >
               Filter by Road
             </Typography>
