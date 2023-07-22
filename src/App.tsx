@@ -69,23 +69,24 @@ function App() {
         value={value}
         onChange={handleChange}
       >
-        <Tab label="Parking Widget" {...a11yProps(0)} />
-        <Tab label="Intersection Dashboard" {...a11yProps(1)} />
-        <Tab label="Risk Map" {...a11yProps(2)} />
+        <Tab label="Risk Map" {...a11yProps(0)} />
+        <Tab label="Parking Widget" {...a11yProps(1)} />
+        <Tab label="Intersection Dashboard" {...a11yProps(2)} />
+        
       </Tabs>
       <TabPanel value={value} index={0}>
         <WidgetWrapper>
-          <ParkingWidget />
+          <RiskMap />
         </WidgetWrapper>
       </TabPanel>
       <TabPanel value={value} index={1}>
         <WidgetWrapper>
-          <IntersectionDashboard />
+          <ParkingWidget />
         </WidgetWrapper>
       </TabPanel>
       <TabPanel value={value} index={2}>
         <WidgetWrapper>
-          <RiskMap />
+          <IntersectionDashboard />
         </WidgetWrapper>
       </TabPanel>
     </Box>
