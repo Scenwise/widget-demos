@@ -122,19 +122,6 @@ class ApexChart extends React.Component<{}, State> {
             fillColors: colors,
           },
         },
-        responsive: [
-          {
-            breakpoint: 480,
-            options: {
-              chart: {
-                width: 200,
-              },
-              legend: {
-                position: "left",
-              },
-            },
-          },
-        ],
       },
     };
   }
@@ -152,7 +139,7 @@ class ApexChart extends React.Component<{}, State> {
             }
           `}
         </style>
-        <Typography variant="h6" style={{paddingLeft:'5px'}}>Proportion of congestion</Typography>
+        <Typography variant="h6" style={{paddingLeft:'5px'}}>Proportion of Congestion</Typography>
             <ReactApexChart
               options={this.state.options}
               series={this.state.series}
