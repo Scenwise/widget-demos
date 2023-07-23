@@ -25,33 +25,29 @@ class IntersectionDashboard extends React.Component {
   render() {
     return (
       <div style={{ padding: '20px', backgroundColor: '#f8f8f8' }} >
-        <Grid container spacing={2}>
-          <Grid item xs={4} container justifyContent="center" alignItems="center" height="100%">
+        <Grid container justifyContent="center" alignItems="center" spacing={20}>
+          <Grid item justifyContent="center" alignItems="center" height="100%">
             <DataHighlightComponent text="Vehicle passing" number={vehiclePassing} color='#8EB7DA'/>
           </Grid>
-          <Grid item xs={4} container justifyContent="center" alignItems="center" height="100%">
+          <Grid item justifyContent="center" alignItems="center" height="100%">
             <DataHighlightComponent text="Violation" number={violation} color='#DA8EB7'/>
           </Grid>
-          <Grid item xs={4} container justifyContent="center" alignItems="center" height="100%">
+          <Grid item justifyContent="center" alignItems="center" height="100%">
             <DataHighlightComponent text="Average proportion of congestion" number={congestion} color={getColor(congestion)}/>
           </Grid>
         </Grid>
 
-        {/* Add a space between the two rows */}
         <div style={{ marginTop: '20px' }} />
 
-        <Grid container spacing={5} justifyContent="center" alignItems="center" height="100%">
-          <Grid item xs={6}>
+        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'}}>
             <WidgetWrapper>
               <CongestionGraph />
             </WidgetWrapper>
-          </Grid>
-          <Grid item xs={6}>
+            <div style={{padding: '10px'}}> </div>
             <WidgetWrapper>
               <VehiclePassingGraph />
             </WidgetWrapper>
-          </Grid>
-        </Grid>
+        </div>
       </div>
     );
   }

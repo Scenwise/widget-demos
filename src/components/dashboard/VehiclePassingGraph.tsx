@@ -62,7 +62,7 @@ class ApexChart extends React.Component<{}, State> {
   render() {
     return (
       <div  style={{padding: '10px'}}>
-        <Typography variant="h6" style={{paddingLeft:'5px'}}>Trend of vehicle passing and violation</Typography>
+        <Typography variant="h6" style={{paddingLeft:'5px'}}>Trend of Vehicle Passing and Violation</Typography>
         <ReactApexChart
           options={this.state.options}
           series={this.state.series}
