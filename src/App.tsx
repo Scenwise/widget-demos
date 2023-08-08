@@ -7,6 +7,7 @@ import WidgetWrapper from "./components/WidgetWrapper";
 import ParkingWidget from "./components/parkingWidget/ParkingWidget";
 import RiskMap from "./components/riskmap/RiskMap";
 import IntersectionDashboard from "./components/dashboard/IntersectionDashboard";
+import PublicTransportWidget from "./components/publicTransport/PublicTransportWidget";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -27,13 +28,13 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && (
         <Box
-        sx={{
-          width: "100vw",
-          height: "90vh",
-          placeItems: "center",
-          display: "grid",
-        }}
-        className="boxy"
+          sx={{
+            width: "100vw",
+            height: "90vh",
+            placeItems: "center",
+            display: "grid",
+          }}
+          className="boxy"
         >
           {children}
         </Box>
@@ -62,21 +63,18 @@ function App() {
         width: "100vw",
         height: "100vh",
         placeItems: "center",
-        display: "grid"
+        display: "grid",
       }}
     >
-      <Tabs
-        value={value}
-        onChange={handleChange}
-      >
-        <Tab label="Risk Map" {...a11yProps(0)} />
+      <Tabs value={value} onChange={handleChange}>
+        <Tab label="Public Transport" {...a11yProps(0)} />
         <Tab label="Parking Widget" {...a11yProps(1)} />
         <Tab label="Intersection Dashboard" {...a11yProps(2)} />
-        
+        <Tab label="Risk Map" {...a11yProps(3)} />
       </Tabs>
       <TabPanel value={value} index={0}>
         <WidgetWrapper>
-          <RiskMap />
+          <PublicTransportWidget />
         </WidgetWrapper>
       </TabPanel>
       <TabPanel value={value} index={1}>
@@ -87,6 +85,11 @@ function App() {
       <TabPanel value={value} index={2}>
         <WidgetWrapper>
           <IntersectionDashboard />
+        </WidgetWrapper>
+      </TabPanel>
+      <TabPanel value={value} index={3}>
+        <WidgetWrapper>
+          <RiskMap />
         </WidgetWrapper>
       </TabPanel>
     </Box>
