@@ -19,6 +19,7 @@ type mapAndContainer = {
   mapContainer: React.MutableRefObject<HTMLDivElement | null>;
   location: LngLatLike;
   zoomLevel: number;
+  is3D?: boolean;
 };
 
 type UseState<T> = [T, React.Dispatch<React.SetStateAction<T>>];
@@ -27,9 +28,10 @@ interface MapBoxContainerProps {
   mapState: UseState<mapboxgl.Map | null>;
   location: LngLatLike;
   zoomLevel: number;
+  is3D?: boolean;
 }
 
-function MapBoxContainer({ mapState, location, zoomLevel }: MapBoxContainerProps) {
+function MapBoxContainer({ mapState, location, zoomLevel, is3D }: MapBoxContainerProps) {
   const [map, setMap] = mapState;
   const mapContainer = useRef<HTMLDivElement | null>(null);
 
@@ -42,18 +44,19 @@ function MapBoxContainer({ mapState, location, zoomLevel }: MapBoxContainerProps
       throw new Error('Missing accesstoken for mapboxgl');
     }
 
-    if (!map) initializeMap({ setMap, mapContainer, location, zoomLevel });
+    if (!map) initializeMap({ setMap, mapContainer, location, zoomLevel, is3D });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
-  const initializeMap = ({ setMap, mapContainer, location, zoomLevel }: mapAndContainer): void => {
+  const initializeMap = ({ setMap, mapContainer, location, zoomLevel, is3D }: mapAndContainer): void => {
     const center: LngLatLike = location;
     const zoom: number = zoomLevel;
-
+    const pitch: number = is3D ? 45 : 0;
     const map = new mapboxgl.Map({
       container: mapContainer.current as string | HTMLElement,
       style: 'mapbox://styles/ecuzmici/ckxhpe0qo0dkn14lqf9upyv45',
       center,
+      pitch,
       zoom,
     });
 

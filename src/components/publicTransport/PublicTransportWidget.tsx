@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Box, Stack } from "@mui/material";
 import fetchGTFS from "./fetchGTFS";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import MapBoxContainer from "../MapBoxContainer";
+import busStopImage from "./icons/bus-stop-icon.png";
 
 const PublicTransportWidget = () => {
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -14,6 +16,7 @@ const PublicTransportWidget = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("Fetching routes data...");
         const fetchedRoutesData = await fetchGTFS(
           "gtfs_shapes_agency_vehicle_type_number_stops_info_corrected"
         );
@@ -23,6 +26,7 @@ const PublicTransportWidget = () => {
         console.error("Error fetching routes data:", error);
       }
       try {
+        console.log("Fetching stops data...");
         const fetchedStopsData = await fetchGTFS("gtfs_stop_shape_ids_geom");
         setStopsData(fetchedStopsData);
         console.log("Fetched stops data!");
@@ -34,14 +38,11 @@ const PublicTransportWidget = () => {
   }, []);
 
   useEffect(() => {
-    const addSourcesAndLayers = () => {
-      if (map && routesData) {
+    if (routesData && stopsData) {
+      console.log("Adding sources and layers...");
+      const addSourcesAndLayers = () => {
+        if (!map) return;
         console.log("Adding the routes layer...");
-        if (map.getSource("routesSource")) {
-          map.removeLayer("routesLayer");
-          map.removeSource("routesSource");
-        }
-
         map.addSource("routesSource", {
           type: "geojson",
           data: routesData as GeoJSON.FeatureCollection,
@@ -52,49 +53,52 @@ const PublicTransportWidget = () => {
           source: "routesSource",
           layout: {},
           paint: {
-            "line-color": "orange",
+            "line-color": "#4282f5",
             "line-width": 3,
             "line-opacity": 1,
           },
         });
         console.log("Routes layer added!");
-      }
 
-      if (map && stopsData) {
         console.log("Adding stops layer...");
-        if (map.getSource("stopsSource")) {
-          map.removeLayer("stopsLayer");
-          map.removeSource("stopsSource");
-        }
+        map.loadImage(busStopImage, (error, image) => {
+          if (error) throw error;
 
-        map.addSource("stopsSource", {
-          type: "geojson",
-          data: stopsData as GeoJSON.FeatureCollection,
-        });
-        map.addLayer({
-          id: "stopsLayer",
-          type: "circle",
-          source: "stopsSource",
-          layout: {},
-          paint: {
-            "circle-color": "red",
-            "circle-radius": 6,
-            "circle-stroke-color": "#FFF",
-            "circle-stroke-width": 2,
-          },
+          if (image !== undefined) map.addImage("busStop", image);
+
+          map.addSource("stopsSource", {
+            type: "geojson",
+            data: stopsData as GeoJSON.FeatureCollection,
+          });
+          map.addLayer({
+            id: "stopsLayer",
+            type: "symbol",
+            source: "stopsSource",
+            layout: {
+              "icon-image": "busStop", // reference the image
+              "icon-size": 0.08,
+            },
+          });
         });
         console.log("Stops layer added!");
-      }
-    };
-    addSourcesAndLayers();
+      };
+      addSourcesAndLayers();
+    }
   }, [map, routesData, stopsData]);
 
   return (
-    <MapBoxContainer
-      mapState={[map, setMap]}
-      location={[5.025243, 51.567082] as LngLatLike}
-      zoomLevel={8}
-    />
+    <Stack direction="row" alignItems="stretch" height={400}>
+      <Box p={1} flexGrow={1} width="60%">
+        <Box sx={{ borderRadius: 6, overflow: "hidden" }} height="100%">
+          <MapBoxContainer
+            mapState={[map, setMap]}
+            location={[4.525863, 52.370912] as LngLatLike}
+            zoomLevel={14}
+            is3D={true}
+          />
+        </Box>
+      </Box>
+    </Stack>
   );
 };
 
