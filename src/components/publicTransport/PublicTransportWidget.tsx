@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Box, Stack } from "@mui/material";
 import fetchGTFS from "./fetchGTFS";
+import findIntersectedRoads from "./findIntersectedRoads";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
 import MapBoxContainer from "../MapBoxContainer";
-import busStopImage from "./icons/bus-stop-icon.png";
+import { Vehicle } from "../../data/interfaces/Vehicle";
+import * as turf from "@turf/turf";
+import { Route } from "../../data/interfaces/Route";
+
+interface MarkerRoute { 
+  marker: mapboxgl.Marker,
+  route: Route
+}
 
 const PublicTransportWidget = () => {
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -13,10 +20,14 @@ const PublicTransportWidget = () => {
   const [stopsData, setStopsData] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry> | null>(null);
 
+  const RBush = require("rbush");
+  var routeTree = useRef(new RBush());
+  var vehicleMarkers = useRef(new Map<number, MarkerRoute>())
+
+  // Fetch routes and stops data
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Fetching routes data...");
         const fetchedRoutesData = await fetchGTFS(
           "gtfs_shapes_agency_vehicle_type_number_stops_info_corrected"
         );
@@ -26,7 +37,6 @@ const PublicTransportWidget = () => {
         console.error("Error fetching routes data:", error);
       }
       try {
-        console.log("Fetching stops data...");
         const fetchedStopsData = await fetchGTFS("gtfs_stop_shape_ids_geom");
         setStopsData(fetchedStopsData);
         console.log("Fetched stops data!");
@@ -37,12 +47,11 @@ const PublicTransportWidget = () => {
     fetchData();
   }, []);
 
+  // Display routes and stops on the map
   useEffect(() => {
     if (routesData && stopsData) {
-      console.log("Adding sources and layers...");
       const addSourcesAndLayers = () => {
         if (!map) return;
-        console.log("Adding the routes layer...");
         map.addSource("routesSource", {
           type: "geojson",
           data: routesData as GeoJSON.FeatureCollection,
@@ -53,38 +62,128 @@ const PublicTransportWidget = () => {
           source: "routesSource",
           layout: {},
           paint: {
-            "line-color": "#4282f5",
+            "line-color": "#4ea0b4",
             "line-width": 3,
             "line-opacity": 1,
           },
         });
         console.log("Routes layer added!");
 
-        console.log("Adding stops layer...");
-        map.loadImage(busStopImage, (error, image) => {
-          if (error) throw error;
-
-          if (image !== undefined) map.addImage("busStop", image);
-
-          map.addSource("stopsSource", {
-            type: "geojson",
-            data: stopsData as GeoJSON.FeatureCollection,
-          });
-          map.addLayer({
-            id: "stopsLayer",
-            type: "symbol",
-            source: "stopsSource",
-            layout: {
-              "icon-image": "busStop", // reference the image
-              "icon-size": 0.08,
-            },
-          });
+        map.addSource("stopsSource", {
+          type: "geojson",
+          data: stopsData as GeoJSON.FeatureCollection,
+        });
+        map.addLayer({
+          id: "stopsLayer",
+          type: "circle",
+          source: "stopsSource",
+          layout: {},
+          paint: {
+            "circle-color": "#4ea0b4",
+            "circle-radius": 4,
+            "circle-stroke-color": "#FFF",
+            "circle-stroke-width": 1,
+          },
         });
         console.log("Stops layer added!");
       };
       addSourcesAndLayers();
     }
   }, [map, routesData, stopsData]);
+
+  // Create RBush structure
+  useEffect(() => {
+    // TODO bulk insertion to optimize even more
+    const routeIndex = new RBush();
+    routesData?.features.forEach((feature) => {
+      const bbox = turf.bbox(feature); // Use a bounding box of the feature as the index entry
+      routeIndex.insert({
+        minX: bbox[0],
+        minY: bbox[1],
+        maxX: bbox[2],
+        maxY: bbox[3],
+        route: feature,
+      });
+    });
+    routeTree.current = routeIndex;
+    console.log("Constructed RBush!");
+  }, [routesData, RBush]);
+
+  useEffect(() => {
+    // Create websocket connection
+    const webSocketURL = "wss://prod.dataservice.scenwise.nl/kv6";
+    const socket = new WebSocket(webSocketURL);
+
+    socket.onopen = () => {
+      const message = JSON.stringify({
+        Command: {
+          Set: {
+            Select: {
+              Stream: true,
+              timeStart: 1697884890000,
+              timeStop: 1700559690000,
+              region_ID: "Netherlands",
+            },
+          },
+        },
+      });
+
+      // Send the message to the server
+      socket.send(message);
+    };
+
+    // On each socket message, process vehicles and find their corresponding route
+    socket.onmessage = (event) => {
+      var message = event.data; // Take the data of the websocket message
+      if (message === "Successfully connected!") console.log(message);
+      else {
+        console.log("Received message")
+        var packets = JSON.parse(message).Packet; // Take the packet of vehicles from the message
+        for (var packet of packets) {
+          var vehicle = JSON.parse(packet.Payload) as Vehicle;
+
+          if (vehicle.longitude && vehicle.latitude) {
+            // If we already have this vehicle in move, set it to next position
+            if(vehicleMarkers.current.has(vehicle.vehicleNumber) && map) {
+              const currentMarkerRoute = vehicleMarkers.current.get(vehicle.vehicleNumber)
+              currentMarkerRoute?.marker.setLngLat([vehicle.longitude, vehicle.latitude]).addTo(map)
+              console.log("Moved marker of vehicle: " + vehicle.vehicleNumber + "on route: " + currentMarkerRoute?.route.routeName)
+            }
+
+            // If we do not have this vehicle, find its route
+            var intersectedRoads = findIntersectedRoads(vehicle, routeTree);
+            if (intersectedRoads.length === 1 && map !== null) { // TODO: make smarter choice here, rn only picking if only one intersection
+              var popup = new mapboxgl.Popup()
+                .setText("Route: " + intersectedRoads[0].routeCommonId + "\nVehicle: " + vehicle.vehicleNumber)
+                .addTo(map);
+              var marker = new mapboxgl.Marker()
+                .setLngLat([vehicle.longitude, vehicle.latitude])
+                .addTo(map)
+                .setPopup(popup);
+              vehicleMarkers.current.set(vehicle.vehicleNumber, {
+                marker: marker,
+                route: intersectedRoads[0]
+              })
+              console.log("Added new marker of vehicle: " +  vehicle.vehicleNumber + "on route: " + intersectedRoads[0].routeName)
+              // TODO animate vehicles
+            }
+          }
+        }
+      }
+    };
+
+    socket.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    socket.onclose = (event) => {
+      console.log("WebSocket closed:", event);
+    };
+
+    return () => {
+      socket.close();
+    };
+  });
 
   return (
     <Stack direction="row" alignItems="stretch" height={400}>
