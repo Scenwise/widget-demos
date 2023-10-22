@@ -7,6 +7,7 @@ import MapBoxContainer from "../MapBoxContainer";
 import { Vehicle } from "../../data/interfaces/Vehicle";
 import * as turf from "@turf/turf";
 import { Route } from "../../data/interfaces/Route";
+import animateAlongRoute from "./animateVehicles";
 // import logMarker from "./logHelpers";
 
 interface VehicleRoutePair {
@@ -148,9 +149,7 @@ const PublicTransportWidget = () => {
             // If we already have this vehicle in move, set it to next position and update the map
             const vehicleRoutePair = vehicleMarkers.current.get(vehicle.vehicleNumber);
             if (vehicleRoutePair !== undefined) {
-              vehicleRoutePair.marker
-                .setLngLat([vehicle.longitude, vehicle.latitude])
-                .addTo(map);
+              animateAlongRoute(vehicleRoutePair.marker, [vehicle.longitude, vehicle.latitude], vehicleRoutePair.route, map)
               vehicleMarkers.current.set(vehicle.vehicleNumber, {
                 marker: vehicleRoutePair.marker,
                 route: vehicleRoutePair.route,
@@ -162,17 +161,6 @@ const PublicTransportWidget = () => {
 
             else {
               var intersectedRoads = findIntersectedRoads(vehicle, routeTree);
-              // Uncomment for debugging intersections:
-              // if(intersectedRoads.length === 0) {
-              //   new mapboxgl.Marker({color: "red"})
-              //     .setLngLat([vehicle.longitude, vehicle.latitude])
-              //     .addTo(map)
-              // }
-              // if(intersectedRoads.length > 1) {
-              //   new mapboxgl.Marker({color: "yellow"})
-              //     .setLngLat([vehicle.longitude, vehicle.latitude])
-              //     .addTo(map)
-              // }
               if (intersectedRoads.length === 1) {
                 var popup = new mapboxgl.Popup()
                   .setText(

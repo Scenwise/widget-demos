@@ -1,56 +1,32 @@
+import mapboxgl from "mapbox-gl";
 import { Route } from "../../data/interfaces/Route";
+import * as turf from "@turf/turf";
 
-const animateVehicles = (marker: mapboxgl.Marker, route: Route) => {
-  const lineStrings = route.geometry;
-  let currentLineStringIndex = 0;
-  let currentPosition = 0;
-  const speed = 1;
-  let totalSteps = lineStrings[currentLineStringIndex].length;
+const animateAlongRoute = (marker: mapboxgl.Marker, newPos: Array<number>, route: Route, map: mapboxgl.Map) => {
+  // Reduce the multiline string into a single linestring for easier traversal
+  let line = route.coordinates.reduce((acc, segment) => acc.concat(segment), []);
 
-  function animateStep() {
-    if (currentLineStringIndex >= lineStrings.length) {
-      // Bus has reached the end of the route
-      return;
-    }
+  // Find current and new positions on route and slice the route to that zone only
+  const convertedLine = turf.featureCollection(line.map(x => turf.point(x)))
+  let startPosition = turf.nearestPoint(marker.getLngLat().toArray(), convertedLine).geometry.coordinates
+  let endPosition = turf.nearestPoint(newPos, convertedLine).geometry.coordinates
 
-    if (currentPosition < totalSteps - 1) {
-      const [currentLng, currentLat] =
-        lineStrings[currentLineStringIndex][currentPosition];
-      const [nextLng, nextLat] =
-        lineStrings[currentLineStringIndex][currentPosition + 1];
+  const startIndex = line.findIndex(coord => coord[0] === startPosition[0] && coord[1] === startPosition[1])
+  const endIndex = line.findIndex(coord => coord[0] === endPosition[0] && coord[1] === endPosition[1])
 
-      const easing = (t: number) => t; // You can use different easing functions for smoother animation
-      const progress = (currentPosition % totalSteps) / totalSteps;
+  line = line.slice(startIndex, endIndex + 1)
 
-      const lng = currentLng + (nextLng - currentLng) * easing(progress);
-      const lat = currentLat + (nextLat - currentLat) * easing(progress);
+  let counter = 0;
+  function animate() {
+    if(counter === line.length) return;
+    marker.setLngLat([line[counter][0], line[counter][1]]).addTo(map);
 
-      marker.setLngLat([lng, lat]);
-
-      // Update the currentPosition based on the speed
-      currentPosition += speed;
-
-      requestAnimationFrame(animateStep);
-    } else {
-      // Bus has reached the end of the current LineString
-      // Move to the next LineString, if available
-      currentLineStringIndex += 1;
-      if (currentLineStringIndex < lineStrings.length) {
-        currentPosition = 0;
-        totalSteps = lineStrings[currentLineStringIndex].length;
-      } else {
-        // Bus has reached the end of the entire route
-        currentLineStringIndex = 0;
-        currentPosition = 0;
-        animateStep();
-        return;
-      }
-
-      // Continue the animation
-      requestAnimationFrame(animateStep);
-    }
+    // Request the next frame of animation
+    requestAnimationFrame(animate)
+    counter++;
   }
-  animateStep();
+
+  animate();
 };
 
-export default animateVehicles;
+export default animateAlongRoute;

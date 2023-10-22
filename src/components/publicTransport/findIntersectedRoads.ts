@@ -29,7 +29,7 @@ const findIntersectedRoads = (vehicle: Vehicle, routeTree: any) => {
         routeCommonId: bbox.route.properties.line_numbe,
         routeName: bbox.route.properties.route_name,
         vehicleType: bbox.route.properties.vehicle_ty,
-        geometry: bbox.route.geometry
+        coordinates: bbox.route.geometry.coordinates
       });
     }
   }

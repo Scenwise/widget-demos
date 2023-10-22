@@ -10,5 +10,5 @@ export interface Route {
     routeCommonId: string, // bus number
     routeName: string,
     vehicleType: string,
-    geometry: Array<Array<Array<number>>> // list of lists of coordinate pairs
+    coordinates: Array<Array<Array<number>>> // list of lists of coordinate pairs
 }
