@@ -7,10 +7,11 @@ import MapBoxContainer from "../MapBoxContainer";
 import { Vehicle } from "../../data/interfaces/Vehicle";
 import * as turf from "@turf/turf";
 import { Route } from "../../data/interfaces/Route";
+// import logMarker from "./logHelpers";
 
-interface MarkerRoute { 
-  marker: mapboxgl.Marker,
-  route: Route
+interface VehicleRoutePair {
+  marker: mapboxgl.Marker;
+  route: Route;
 }
 
 const PublicTransportWidget = () => {
@@ -22,7 +23,7 @@ const PublicTransportWidget = () => {
 
   const RBush = require("rbush");
   var routeTree = useRef(new RBush());
-  var vehicleMarkers = useRef(new Map<number, MarkerRoute>())
+  var vehicleMarkers = useRef(new Map<number, VehicleRoutePair>());
 
   // Fetch routes and stops data
   useEffect(() => {
@@ -91,20 +92,20 @@ const PublicTransportWidget = () => {
     }
   }, [map, routesData, stopsData]);
 
-  // Create RBush structure
+  // Create RBush structure with bulk insertion for increased efficiency
   useEffect(() => {
-    // TODO bulk insertion to optimize even more
     const routeIndex = new RBush();
-    routesData?.features.forEach((feature) => {
-      const bbox = turf.bbox(feature); // Use a bounding box of the feature as the index entry
-      routeIndex.insert({
-        minX: bbox[0],
-        minY: bbox[1],
-        maxX: bbox[2],
-        maxY: bbox[3],
-        route: feature,
-      });
-    });
+    const mappedData = routesData?.features.map((feature) => ({
+      bbox: turf.bbox(feature),
+      feature: feature,
+    })).map((tuple) => ({
+      minX: tuple.bbox[0],
+      minY: tuple.bbox[1],
+      maxX: tuple.bbox[2],
+      maxY: tuple.bbox[3],
+      route: tuple.feature,
+    }));
+    routeIndex.load(mappedData);
     routeTree.current = routeIndex;
     console.log("Constructed RBush!");
   }, [routesData, RBush]);
@@ -120,8 +121,8 @@ const PublicTransportWidget = () => {
           Set: {
             Select: {
               Stream: true,
-              timeStart: 1697884890000,
-              timeStop: 1700559690000,
+              timeStart: Date.now() - 20000, // start about 20 seconds before current time
+              timeStop: 1918892497000, // stop sometime in 2030
               region_ID: "Netherlands",
             },
           },
@@ -137,35 +138,60 @@ const PublicTransportWidget = () => {
       var message = event.data; // Take the data of the websocket message
       if (message === "Successfully connected!") console.log(message);
       else {
-        console.log("Received message")
-        var packets = JSON.parse(message).Packet; // Take the packet of vehicles from the message
+        var packets = JSON.parse(message).Packet;
         for (var packet of packets) {
           var vehicle = JSON.parse(packet.Payload) as Vehicle;
 
-          if (vehicle.longitude && vehicle.latitude) {
-            // If we already have this vehicle in move, set it to next position
-            if(vehicleMarkers.current.has(vehicle.vehicleNumber) && map) {
-              const currentMarkerRoute = vehicleMarkers.current.get(vehicle.vehicleNumber)
-              currentMarkerRoute?.marker.setLngLat([vehicle.longitude, vehicle.latitude]).addTo(map)
-              console.log("Moved marker of vehicle: " + vehicle.vehicleNumber + "on route: " + currentMarkerRoute?.route.routeName)
+          // Only process vehicles that are well-constructed and once the routes are loaded
+          if (vehicle.longitude && vehicle.latitude && map !== null && routesData !== null) {
+
+            // If we already have this vehicle in move, set it to next position and update the map
+            const vehicleRoutePair = vehicleMarkers.current.get(vehicle.vehicleNumber);
+            if (vehicleRoutePair !== undefined) {
+              vehicleRoutePair.marker
+                .setLngLat([vehicle.longitude, vehicle.latitude])
+                .addTo(map);
+              vehicleMarkers.current.set(vehicle.vehicleNumber, {
+                marker: vehicleRoutePair.marker,
+                route: vehicleRoutePair.route,
+              });
+              // Uncomment for console logs: logMarker("move", vehicle.vehicleNumber, vehicle.timestamp, vehicleRoutePair.route.routeName);
             }
 
             // If we do not have this vehicle, find its route
-            var intersectedRoads = findIntersectedRoads(vehicle, routeTree);
-            if (intersectedRoads.length === 1 && map !== null) { // TODO: make smarter choice here, rn only picking if only one intersection
-              var popup = new mapboxgl.Popup()
-                .setText("Route: " + intersectedRoads[0].routeCommonId + "\nVehicle: " + vehicle.vehicleNumber)
-                .addTo(map);
-              var marker = new mapboxgl.Marker()
-                .setLngLat([vehicle.longitude, vehicle.latitude])
-                .addTo(map)
-                .setPopup(popup);
-              vehicleMarkers.current.set(vehicle.vehicleNumber, {
-                marker: marker,
-                route: intersectedRoads[0]
-              })
-              console.log("Added new marker of vehicle: " +  vehicle.vehicleNumber + "on route: " + intersectedRoads[0].routeName)
-              // TODO animate vehicles
+
+            else {
+              var intersectedRoads = findIntersectedRoads(vehicle, routeTree);
+              // Uncomment for debugging intersections:
+              // if(intersectedRoads.length === 0) {
+              //   new mapboxgl.Marker({color: "red"})
+              //     .setLngLat([vehicle.longitude, vehicle.latitude])
+              //     .addTo(map)
+              // }
+              // if(intersectedRoads.length > 1) {
+              //   new mapboxgl.Marker({color: "yellow"})
+              //     .setLngLat([vehicle.longitude, vehicle.latitude])
+              //     .addTo(map)
+              // }
+              if (intersectedRoads.length === 1) {
+                var popup = new mapboxgl.Popup()
+                  .setText(
+                    "Route: " +
+                      intersectedRoads[0].routeCommonId +
+                      "\nVehicle: " +
+                      vehicle.vehicleNumber
+                  )
+                  .addTo(map);
+                var marker = new mapboxgl.Marker()
+                  .setLngLat([vehicle.longitude, vehicle.latitude])
+                  .addTo(map)
+                  .setPopup(popup);
+                vehicleMarkers.current.set(vehicle.vehicleNumber, {
+                  marker: marker,
+                  route: intersectedRoads[0],
+                });
+                // Uncomment for console logs: logMarker("add", vehicle.vehicleNumber, vehicle.timestamp, intersectedRoads[0].routeName);
+              }
             }
           }
         }
@@ -191,8 +217,8 @@ const PublicTransportWidget = () => {
         <Box sx={{ borderRadius: 6, overflow: "hidden" }} height="100%">
           <MapBoxContainer
             mapState={[map, setMap]}
-            location={[4.525863, 52.370912] as LngLatLike}
-            zoomLevel={14}
+            location={[4.9041, 52.3676] as LngLatLike}
+            zoomLevel={10}
             is3D={true}
           />
         </Box>
