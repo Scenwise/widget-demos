@@ -1,6 +1,6 @@
 // Realtime vehicles data model, corresponding to the KV6 structure
 
-export type Vehicle = {
+export interface Vehicle {
     messageType: string,
     dataOwnerCode: string,
     linePlanningNumber: string,

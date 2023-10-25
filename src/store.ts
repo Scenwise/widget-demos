@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit';
 import parkingWidgetSlice from './components/parkingWidget/parkingWidgetSlice';
 import accidentsWidgetSlice from './components/riskmap/accidentsWidgetSlice';
+import vehicleSlice from './components/publicTransport/VehicleSlice';
 
 export const store = configureStore({
   reducer: {
     parkingWidget: parkingWidgetSlice,
-    accidentsWidget: accidentsWidgetSlice
+    accidentsWidget: accidentsWidgetSlice,
+    publicTransport: vehicleSlice
   },
 });
 

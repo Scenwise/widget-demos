@@ -7,7 +7,7 @@ const findIntersectedRoads = (vehicle: Vehicle, routeTree: any) => {
   const vehiclePoint = turf.point([vehicle.longitude, vehicle.latitude]);
 
   // Query the spatial index to find intersecting route bounding boxes
-  const intersectingBB = routeTree.current.search({
+  let intersectingBB = routeTree.current.search({
     minX: vehicle.longitude,
     minY: vehicle.latitude,
     maxX: vehicle.longitude,
@@ -15,25 +15,20 @@ const findIntersectedRoads = (vehicle: Vehicle, routeTree: any) => {
   });
 
   // Find actual roads the vehicle point intersects
-  var intersectedRoads = new Array<Route>();
-  for (var bbox of intersectingBB) {
-    // Use a buffer of 2 meters radius to account for precision issues
-    if (!turf.booleanDisjoint(turf.buffer(vehiclePoint, 0.002), bbox.route)) {
-      intersectedRoads.push({
-        id: bbox.route.properties.id,
-        origin: bbox.route.properties.origin,
-        routeId: bbox.route.properties.route_id,
-        shapeId: bbox.route.properties.shape_id,
-        agencyId: bbox.route.properties.agency_id,
-        destination: bbox.route.properties.destinatio,
-        routeCommonId: bbox.route.properties.line_numbe,
-        routeName: bbox.route.properties.route_name,
-        vehicleType: bbox.route.properties.vehicle_ty,
-        coordinates: bbox.route.geometry.coordinates
-      });
-    }
-  }
-  return intersectedRoads;
+  intersectingBB = intersectingBB
+  .filter((bbox: any) => !turf.booleanDisjoint(turf.buffer(vehiclePoint, 0.005), bbox.route)) // Use a buffer of 5 meters radius
+  .map((bbox: any) => ({
+    id: bbox.route.properties.id,
+    origin: bbox.route.properties.origin,
+    routeId: bbox.route.properties.route_id,
+    shapeId: bbox.route.properties.shape_id,
+    agencyId: bbox.route.properties.agency_id,
+    destination: bbox.route.properties.destinatio,
+    routeCommonId: bbox.route.properties.line_numbe,
+    routeName: bbox.route.properties.route_name,
+    vehicleType: bbox.route.properties.vehicle_ty,
+    coordinates: bbox.route.geometry.coordinates
+  } as Route));
+  return intersectingBB;
 };
-
 export default findIntersectedRoads;

@@ -1,19 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Box, Stack } from "@mui/material";
+import { Paper, Typography, List, ListSubheader, Box, Stack } from "@mui/material";
 import fetchGTFS from "./fetchGTFS";
 import findIntersectedRoads from "./findIntersectedRoads";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 import MapBoxContainer from "../MapBoxContainer";
 import { Vehicle } from "../../data/interfaces/Vehicle";
 import * as turf from "@turf/turf";
-import { Route } from "../../data/interfaces/Route";
+import { VehicleRoutePair } from "../../data/interfaces/VehicleRoutePair";
 import animateAlongRoute from "./animateVehicles";
+import VehicleListItem from "./VehicleListItem";
+import { RootState } from '../../store';
+import { useSelector } from 'react-redux';
 // import logMarker from "./logHelpers";
-
-interface VehicleRoutePair {
-  marker: mapboxgl.Marker;
-  route: Route;
-}
 
 const PublicTransportWidget = () => {
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -21,10 +19,12 @@ const PublicTransportWidget = () => {
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry> | null>(null);
   const [stopsData, setStopsData] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry> | null>(null);
+  let listKey = 0
 
   const RBush = require("rbush");
   var routeTree = useRef(new RBush());
-  var vehicleMarkers = useRef(new Map<number, VehicleRoutePair>());
+  // Keys are of format: "[DataOwnerCode]-[VehicleNumber]"
+  const [vehicleMarkers, setVehicleMarkers] = useState(new Map<string, VehicleRoutePair>());
 
   // Fetch routes and stops data
   useEffect(() => {
@@ -111,8 +111,8 @@ const PublicTransportWidget = () => {
     console.log("Constructed RBush!");
   }, [routesData, RBush]);
 
+  // Create websocket connection
   useEffect(() => {
-    // Create websocket connection
     const webSocketURL = "wss://prod.dataservice.scenwise.nl/kv6";
     const socket = new WebSocket(webSocketURL);
 
@@ -132,6 +132,7 @@ const PublicTransportWidget = () => {
 
       // Send the message to the server
       socket.send(message);
+      setTimeout(() => 5000)
     };
 
     // On each socket message, process vehicles and find their corresponding route
@@ -142,24 +143,24 @@ const PublicTransportWidget = () => {
         var packets = JSON.parse(message).Packet;
         for (var packet of packets) {
           var vehicle = JSON.parse(packet.Payload) as Vehicle;
-
-          // Only process vehicles that are well-constructed and once the routes are loaded
-          if (vehicle.longitude && vehicle.latitude && map !== null && routesData !== null) {
-
+          // Only process vehicles that have info about both delay and position; only process once routes data is loaded
+          if (vehicle.messageType === "ONROUTE" && vehicle.rdX !== -1 && vehicle.rdY !== -1 && vehicle.longitude && vehicle.latitude && map !== null && routesData !== null) {
             // If we already have this vehicle in move, set it to next position and update the map
-            const vehicleRoutePair = vehicleMarkers.current.get(vehicle.vehicleNumber);
-            if (vehicleRoutePair !== undefined) {
-              animateAlongRoute(vehicleRoutePair.marker, [vehicle.longitude, vehicle.latitude], vehicleRoutePair.route, map)
-              vehicleMarkers.current.set(vehicle.vehicleNumber, {
+            const mapKey = vehicle.dataOwnerCode + "-" + vehicle.vehicleNumber
+            const vehicleRoutePair = vehicleMarkers.get(mapKey);
+            // Only process movement if timestamp of last move is before timestamp of current move
+            if (vehicleRoutePair !== undefined && vehicleRoutePair.vehicle.timestamp < vehicle.timestamp) {
+              animateAlongRoute(vehicleRoutePair, [vehicle.longitude, vehicle.latitude], map)
+              setVehicleMarkers(new Map(vehicleMarkers.set(mapKey, {
                 marker: vehicleRoutePair.marker,
                 route: vehicleRoutePair.route,
-              });
+                vehicle: vehicle // update delay, timestamp
+              })));
               // Uncomment for console logs: logMarker("move", vehicle.vehicleNumber, vehicle.timestamp, vehicleRoutePair.route.routeName);
             }
 
             // If we do not have this vehicle, find its route
-
-            else {
+            else if (vehicleRoutePair === undefined) {
               var intersectedRoads = findIntersectedRoads(vehicle, routeTree);
               if (intersectedRoads.length === 1) {
                 var popup = new mapboxgl.Popup()
@@ -167,17 +168,17 @@ const PublicTransportWidget = () => {
                     "Route: " +
                       intersectedRoads[0].routeCommonId +
                       "\nVehicle: " +
-                      vehicle.vehicleNumber
+                      mapKey
                   )
-                  .addTo(map);
                 var marker = new mapboxgl.Marker()
                   .setLngLat([vehicle.longitude, vehicle.latitude])
                   .addTo(map)
                   .setPopup(popup);
-                vehicleMarkers.current.set(vehicle.vehicleNumber, {
+                setVehicleMarkers(new Map(vehicleMarkers.set(mapKey, {
                   marker: marker,
                   route: intersectedRoads[0],
-                });
+                  vehicle: vehicle
+                })));
                 // Uncomment for console logs: logMarker("add", vehicle.vehicleNumber, vehicle.timestamp, intersectedRoads[0].routeName);
               }
             }
@@ -197,10 +198,47 @@ const PublicTransportWidget = () => {
     return () => {
       socket.close();
     };
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routesData]);
+
+  // Boilerplate for fly to location
+  const { flyToLocation } = useSelector(
+    (state: RootState) => state.publicTransport,
+  );
+
+  useEffect(() => {
+    if (!map) return;
+    if (!flyToLocation) return;
+
+    map.flyTo({ center: flyToLocation, zoom: 14 });
+  }, [map, flyToLocation]);
 
   return (
-    <Stack direction="row" alignItems="stretch" height={400}>
+    <Stack direction="row" alignItems="stretch" height={700} width={1400}>
+       <Paper
+        elevation={0}
+        sx={{ width: '25%', position: 'relative', overflow: 'auto' }}
+      >
+        <Box
+          position="sticky"
+          sx={{ bgcolor: 'background.paper', top: 0, px: 2, pt: 2, zIndex: 1 }}
+        >
+          <Typography variant="h6">Public Transportation Netherlands</Typography>
+        </Box>
+        <List>
+          <ListSubheader sx={{ top: 48, bgcolor: 'background.paper' }}>
+            All vehicles
+          </ListSubheader>
+
+          {Array.from(vehicleMarkers.values()).map((pair) => (
+          <VehicleListItem
+            key={listKey++}
+            vehicle={pair.vehicle}
+            route={pair.route}
+          />
+        ))}
+        </List>
+      </Paper>
       <Box p={1} flexGrow={1} width="60%">
         <Box sx={{ borderRadius: 6, overflow: "hidden" }} height="100%">
           <MapBoxContainer

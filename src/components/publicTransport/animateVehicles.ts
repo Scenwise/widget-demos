@@ -1,31 +1,34 @@
 import mapboxgl from "mapbox-gl";
-import { Route } from "../../data/interfaces/Route";
 import * as turf from "@turf/turf";
+import { VehicleRoutePair } from "../../data/interfaces/VehicleRoutePair";
 
-const animateAlongRoute = (marker: mapboxgl.Marker, newPos: Array<number>, route: Route, map: mapboxgl.Map) => {
+const animateAlongRoute = (vehicleRoutePair: VehicleRoutePair, newPosition: Array<number>, map: mapboxgl.Map) => {
+
   // Reduce the multiline string into a single linestring for easier traversal
-  let line = route.coordinates.reduce((acc, segment) => acc.concat(segment), []);
+  let line = vehicleRoutePair.route.coordinates.flat();
 
   // Find current and new positions on route and slice the route to that zone only
   const convertedLine = turf.featureCollection(line.map(x => turf.point(x)))
-  let startPosition = turf.nearestPoint(marker.getLngLat().toArray(), convertedLine).geometry.coordinates
-  let endPosition = turf.nearestPoint(newPos, convertedLine).geometry.coordinates
+  let startPosition = turf.nearestPoint(vehicleRoutePair.marker.getLngLat().toArray(), convertedLine).geometry.coordinates
+  let endPosition = turf.nearestPoint([newPosition[0], newPosition[1]], convertedLine).geometry.coordinates
 
-  const startIndex = line.findIndex(coord => coord[0] === startPosition[0] && coord[1] === startPosition[1])
-  const endIndex = line.findIndex(coord => coord[0] === endPosition[0] && coord[1] === endPosition[1])
+  let startIndex = line.findIndex(coord => coord[0] === startPosition[0] && coord[1] === startPosition[1])
+  let endIndex = line.findIndex(coord => coord[0] === endPosition[0] && coord[1] === endPosition[1])
 
-  line = line.slice(startIndex, endIndex + 1)
+  let increment = 1
+  if(startIndex > endIndex) increment = -1 // if start is after end in the route, we move backwards
 
-  let counter = 0;
+  let counter = startIndex
   function animate() {
-    if(counter === line.length) return;
-    marker.setLngLat([line[counter][0], line[counter][1]]).addTo(map);
+    // If decreasing, we start from endIndex
+      if(counter === endIndex + increment) return;
+      vehicleRoutePair.marker.setLngLat([line[counter][0], line[counter][1]]).addTo(map);
 
-    // Request the next frame of animation
-    requestAnimationFrame(animate)
-    counter++;
+      // Request the next frame of animation
+      counter += increment;
+      requestAnimationFrame(animate)
   }
-
+ 
   animate();
 };
 
