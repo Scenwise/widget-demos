@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Paper, Typography, List, ListSubheader, Box, Stack } from "@mui/material";
+import { TextField, Paper, Typography, List, ListSubheader, Box, Stack } from "@mui/material";
 import fetchGTFS from "./fetchGTFS";
 import findIntersectedRoads from "./findIntersectedRoads";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
@@ -19,12 +19,15 @@ const PublicTransportWidget = () => {
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry> | null>(null);
   const [stopsData, setStopsData] =
     useState<GeoJSON.FeatureCollection<GeoJSON.Geometry> | null>(null);
-  let listKey = 0
 
   const RBush = require("rbush");
   var routeTree = useRef(new RBush());
   // Keys are of format: "[DataOwnerCode]-[VehicleNumber]"
   const [vehicleMarkers, setVehicleMarkers] = useState(new Map<string, VehicleRoutePair>());
+
+  // Used for UI sidebar
+  const [searchQuery, setSearchQuery] = useState('');
+  let listKey = 0
 
   // Fetch routes and stops data
   useEffect(() => {
@@ -154,7 +157,7 @@ const PublicTransportWidget = () => {
               setVehicleMarkers(new Map(vehicleMarkers.set(mapKey, {
                 marker: vehicleRoutePair.marker,
                 route: vehicleRoutePair.route,
-                vehicle: vehicle // update delay, timestamp
+                vehicle: vehicle // update delay, timestamp, position
               })));
               // Uncomment for console logs: logMarker("move", vehicle.vehicleNumber, vehicle.timestamp, vehicleRoutePair.route.routeName);
             }
@@ -229,12 +232,20 @@ const PublicTransportWidget = () => {
           <ListSubheader sx={{ top: 48, bgcolor: 'background.paper' }}>
             All vehicles
           </ListSubheader>
+          <TextField
+          label="Search by vehicle or route"
+          variant="outlined"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          fullWidth
+        />
 
           {Array.from(vehicleMarkers.values()).map((pair) => (
           <VehicleListItem
             key={listKey++}
             vehicle={pair.vehicle}
             route={pair.route}
+            searchText={searchQuery}
           />
         ))}
         </List>
