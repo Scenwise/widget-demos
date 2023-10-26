@@ -153,12 +153,22 @@ const PublicTransportWidget = () => {
             const vehicleRoutePair = vehicleMarkers.get(mapKey);
             // Only process movement if timestamp of last move is before timestamp of current move
             if (vehicleRoutePair !== undefined && vehicleRoutePair.vehicle.timestamp < vehicle.timestamp) {
-              animateAlongRoute(vehicleRoutePair, [vehicle.longitude, vehicle.latitude], map)
-              setVehicleMarkers(new Map(vehicleMarkers.set(mapKey, {
-                marker: vehicleRoutePair.marker,
-                route: vehicleRoutePair.route,
-                vehicle: vehicle // update delay, timestamp, position
-              })));
+              const correct = animateAlongRoute(vehicleRoutePair, [vehicle.longitude, vehicle.latitude], map)
+              if(correct) {
+                setVehicleMarkers(new Map(vehicleMarkers.set(mapKey, {
+                  marker: vehicleRoutePair.marker,
+                  route: vehicleRoutePair.route,
+                  vehicle: vehicle // update delay, timestamp, position
+                })));
+              }
+              // If we misintersected, remove marker completely and try again on next update
+              else {
+                console.log("Found misintersection")
+                console.log(vehicleMarkers.size)
+                vehicleMarkers.delete(mapKey)
+                setVehicleMarkers(new Map(vehicleMarkers))
+                console.log(vehicleMarkers.size)
+              }
               // Uncomment for console logs: logMarker("move", vehicle.vehicleNumber, vehicle.timestamp, vehicleRoutePair.route.routeName);
             }
 

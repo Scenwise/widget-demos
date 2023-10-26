@@ -10,7 +10,10 @@ const animateAlongRoute = (vehicleRoutePair: VehicleRoutePair, newPosition: Arra
   // Find current and new positions on route and slice the route to that zone only
   const convertedLine = turf.featureCollection(line.map(x => turf.point(x)))
   let startPosition = turf.nearestPoint(vehicleRoutePair.marker.getLngLat().toArray(), convertedLine).geometry.coordinates
-  let endPosition = turf.nearestPoint([newPosition[0], newPosition[1]], convertedLine).geometry.coordinates
+  let endPosition = turf.nearestPoint(newPosition, convertedLine).geometry.coordinates
+
+  // If distance between actual location and location on route is > 100 meters, we misintersected
+  if(turf.distance(turf.point(endPosition), turf.point(newPosition)) > 0.1) return false;
 
   let startIndex = line.findIndex(coord => coord[0] === startPosition[0] && coord[1] === startPosition[1])
   let endIndex = line.findIndex(coord => coord[0] === endPosition[0] && coord[1] === endPosition[1])
@@ -30,6 +33,7 @@ const animateAlongRoute = (vehicleRoutePair: VehicleRoutePair, newPosition: Arra
   }
  
   animate();
+  return true;
 };
 
 export default animateAlongRoute;

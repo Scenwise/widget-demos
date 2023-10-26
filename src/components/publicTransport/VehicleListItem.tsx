@@ -22,7 +22,7 @@ function VehicleListItem({
   const matchesSearch = () => {
     const searchQuery = searchText.toLowerCase();
     return (
-      listKey.includes(searchQuery) ||
+      listKey.toLowerCase().includes(searchQuery) ||
       vehicle.dataOwnerCode.toLowerCase().includes(searchQuery) ||
       vehicle.vehicleNumber.toString().toLowerCase().includes(searchQuery) ||
       route.routeCommonId.toLowerCase().includes(searchQuery) ||
