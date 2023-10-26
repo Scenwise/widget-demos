@@ -163,11 +163,9 @@ const PublicTransportWidget = () => {
               }
               // If we misintersected, remove marker completely and try again on next update
               else {
-                console.log("Found misintersection")
-                console.log(vehicleMarkers.size)
+                vehicleMarkers.get(mapKey)?.marker.remove()
                 vehicleMarkers.delete(mapKey)
                 setVehicleMarkers(new Map(vehicleMarkers))
-                console.log(vehicleMarkers.size)
               }
               // Uncomment for console logs: logMarker("move", vehicle.vehicleNumber, vehicle.timestamp, vehicleRoutePair.route.routeName);
             }
