@@ -28,7 +28,8 @@ const findIntersectedRoads = (vehicle: Vehicle, routeTree: any) => {
     routeName: bbox.route.properties.route_name,
     vehicleType: bbox.route.properties.vehicle_ty,
     coordinates: bbox.route.geometry.coordinates
-  } as Route));
+  } as Route))
+  .filter((route: Route) => route.agencyId === vehicle.dataOwnerCode)
   return intersectingBB;
 };
 export default findIntersectedRoads;
