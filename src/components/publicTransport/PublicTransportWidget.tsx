@@ -27,7 +27,6 @@ const PublicTransportWidget = () => {
 
   // Used for UI sidebar
   const [searchQuery, setSearchQuery] = useState('');
-  let listKey = 0
 
   // Fetch routes and stops data
   useEffect(() => {
@@ -57,6 +56,7 @@ const PublicTransportWidget = () => {
     if (routesData && stopsData) {
       const addSourcesAndLayers = () => {
         if (!map) return;
+
         map.addSource("routesSource", {
           type: "geojson",
           data: routesData as GeoJSON.FeatureCollection,
@@ -140,12 +140,12 @@ const PublicTransportWidget = () => {
 
     // On each socket message, process vehicles and find their corresponding route
     socket.onmessage = (event) => {
-      var message = event.data; // Take the data of the websocket message
+      let message = event.data; // Take the data of the websocket message
       if (message === "Successfully connected!") console.log(message);
       else {
-        var packets = JSON.parse(message).Packet;
+        let packets = JSON.parse(message).Packet;
         for (var packet of packets) {
-          var vehicle = JSON.parse(packet.Payload) as Vehicle;
+          let vehicle = JSON.parse(packet.Payload) as Vehicle;
           // Only process vehicles that have info about both delay and position; only process once routes data is loaded
           if (vehicle.messageType === "ONROUTE" && vehicle.rdX !== -1 && vehicle.rdY !== -1 && vehicle.longitude && vehicle.latitude && map !== null && routesData !== null) {
             // If we already have this vehicle in move, set it to next position and update the map
@@ -250,7 +250,7 @@ const PublicTransportWidget = () => {
 
           {Array.from(vehicleMarkers.values()).map((pair) => (
           <VehicleListItem
-            key={listKey++}
+            key={pair.vehicle.dataOwnerCode + "-" + pair.vehicle.vehicleNumber}
             vehicle={pair.vehicle}
             route={pair.route}
             searchText={searchQuery}

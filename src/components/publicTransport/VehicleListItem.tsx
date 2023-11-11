@@ -28,7 +28,8 @@ function VehicleListItem({
       route.routeCommonId.toLowerCase().includes(searchQuery) ||
       route.origin.toLowerCase().includes(searchQuery) ||
       route.destination.toLowerCase().includes(searchQuery) ||
-      vehicle.journeyNumber.toString().toLowerCase().includes(searchQuery)
+      vehicle.journeyNumber.toString().toLowerCase().includes(searchQuery) ||
+      (route.vehicleType !== null && route.vehicleType.toLowerCase().includes(searchQuery))
     );
   };
 
@@ -40,12 +41,13 @@ function VehicleListItem({
       <ListItemText
         primary={listKey}
         secondary={
-          <div>
+          <span>
             <b>Route:</b> {route.routeCommonId} <br />
             <b>Origin:</b> {route.origin} <br /> 
             <b>Destination:</b> {route.destination} <br />
-            <b>Journey number:</b> {vehicle.journeyNumber}
-          </div>
+            <b>Journey number:</b> {vehicle.journeyNumber} <br />
+            {route.vehicleType !== null && <b>Vehicle type:</b>} {route.vehicleType}
+          </span>
         }
       />
     </ListItemButton>
