@@ -79,8 +79,10 @@ const RiskMap = () => {
         x.Startdatum = combinedDateTime;
         x.Starttijd = new Date(0);
 
-        if (!(x.Eindtijd instanceof Date) && !(x.Einddatum instanceof Date))
-          x.Einddatum = new Date(0);
+        if (!(x.Eindtijd instanceof Date) && !(x.Einddatum instanceof Date)) {
+          x.Einddatum = x.Startdatum;
+          x.Eindtijd = new Date(0);
+        }
         else {
           const combinedDateTime2 = new Date(x.Einddatum);
           if (x.Eindtijd !== undefined) {
@@ -412,7 +414,7 @@ const RiskMap = () => {
     selectedStartTime,
     selectedEndTime,
   ]);
-
+  
   // To access the accidents, use accidents.current
   return (
     <Stack direction="row" alignItems="stretch" height={600} width={1200}>
@@ -567,20 +569,8 @@ const RiskMap = () => {
               hmpVan={location["Hmp van"]}
               hmpTot={location["Hmp tot"]}
               ovd={location.ovd ? location.ovd.toTimeString() : ""}
-              Startdatum={
-                location.Startdatum.getHours() +
-                ":" +
-                location.Startdatum.getMinutes() +
-                " " +
-                location.Startdatum.toDateString()
-              }
-              Einddatum={
-                location.Einddatum.getHours() +
-                ":" +
-                location.Einddatum.getMinutes() +
-                " " +
-                location.Einddatum.toDateString()
-              }
+              Startdatum={location.Einddatum.toLocaleString("nl-NL")}
+              Einddatum={location.Einddatum.toLocaleString("nl-NL")}
               Eerste_tijd_ter_plaatse={
                 location["Eerste tijd ter plaatse"]
                   ? location["Eerste tijd ter plaatse"].toTimeString()
