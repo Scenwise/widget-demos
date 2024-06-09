@@ -12,7 +12,17 @@ const segmentCoordinates = (data: AccidentData) => {
   return coordinates;
 };
 
-const pointCoordinates = (data: AccidentData) => {
+export const pointCoordinates = (data: AccidentData) => {
+  if (data.Longitude !== undefined && data.Latitude !== undefined) {
+    const log10Long = Math.log10(data.Longitude);
+    const exponentLong = Math.floor(log10Long);
+    const longitude = data.Longitude / Math.pow(10, exponentLong);
+
+    const log10Lat = Math.log10(data.Latitude);
+    const exponentLat = Math.floor(log10Lat);
+    const latitude = data.Latitude / Math.pow(10, exponentLat - 1);
+    return [longitude, latitude] as LngLatLike;
+  }
   return [data.Longitude_van, data.Latitude_van] as LngLatLike;
 };
 
@@ -34,7 +44,9 @@ const convertToFeature = (data: AccidentData, segment: string) => {
       hmp_van: data["Hmp van"],
       hmp_tot: data["Hmp tot"],
       zijde: data.Zijde,
-      startdatum: data.Starttijd,
+      starttijd: data.Starttijd,
+      eindtijd: data.Eindtijd,
+      startdatum: data.Startdatum,
       einddatum: data.Einddatum,
       proces: data.Proces,
       beschrijving: data.Beschrijving,
@@ -64,7 +76,7 @@ const featureCollectionConverter = (dataArray: Array<AccidentData>) => {
   };
 
   dataArray.forEach((x) => {
-    x["Hmp tot"]
+    x["Points"] !== undefined && x["Points"] !== ""
       ? featureCollectionSegment.features.push(
           convertToFeature(x, "LineString")
         )

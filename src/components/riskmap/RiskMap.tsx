@@ -21,13 +21,16 @@ import { AccidentData } from "../../data/interfaces/AccidentData";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { LngLatLike } from "mapbox-gl";
-import featureCollectionConverter from "./featureCollectionConverter";
+import featureCollectionConverter, {
+  pointCoordinates,
+} from "./featureCollectionConverter";
 import MapBoxContainer from "../MapBoxContainer";
 import AccidentLocationListItem from "./AccidentLocationListItem";
 
 const RiskMap = () => {
   // Parse the Excel file to retrieve the accidents
-  const filePath = "./accidents-excel/brabant2022.xlsx";
+  const filePath = "./accidents-excel/Rijkswaterstaat-accidents.xlsx";
+  // const filePath = "./accidents-excel/brabant2022.xlsx";
   const [accidentData, setAccidentData] = useState<Array<AccidentData>>([]);
   const [loading, setLoading] = useState(true);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -65,12 +68,38 @@ const RiskMap = () => {
         worksheet
       ) as Array<AccidentData>;
 
+      // Process Date parsing problems
+      JSONdata.forEach((x) => {
+        const combinedDateTime = new Date(x.Starttijd);
+        if (x.Startdatum !== undefined) {
+          combinedDateTime.setFullYear(x.Startdatum.getFullYear());
+          combinedDateTime.setMonth(x.Startdatum.getMonth());
+          combinedDateTime.setDate(x.Startdatum.getDate());
+        }
+        x.Startdatum = combinedDateTime;
+        x.Starttijd = new Date(0);
+
+        if (!(x.Eindtijd instanceof Date) && !(x.Einddatum instanceof Date))
+          x.Einddatum = new Date(0);
+        else {
+          const combinedDateTime2 = new Date(x.Einddatum);
+          if (x.Eindtijd !== undefined) {
+            combinedDateTime2.setHours(x.Eindtijd.getHours());
+            combinedDateTime2.setMinutes(x.Eindtijd.getMinutes());
+            combinedDateTime2.setSeconds(x.Eindtijd.getSeconds());
+          }
+
+          x.Einddatum = combinedDateTime2;
+          x.Eindtijd = new Date(0);
+        }
+      });
       // Set the accident data
       setAccidentData(JSONdata);
       setFilteredAccidentData(JSONdata);
 
       // Set the start time for the accidents as the lowest start time
-      const startTimes = JSONdata.map((x) => x.Starttijd.getTime());
+
+      const startTimes = JSONdata.map((x) => x.Startdatum.getTime());
       const minStart = new Date(Math.min(...startTimes));
       setSelectedStartTime(dayjs(minStart));
 
@@ -370,9 +399,9 @@ const RiskMap = () => {
     // Filter based on start and end time
     filteredData = filteredData.filter(
       (location) =>
-        location.Starttijd.getTime() >=
+        location.Startdatum.getTime() >=
           (selectedStartTime === null ? 0 : selectedStartTime.unix()) * 1000 &&
-        location.Starttijd.getTime() <=
+        location.Startdatum.getTime() <=
           (selectedEndTime === null ? 0 : selectedEndTime.unix()) * 1000
     );
     setFilteredAccidentData(filteredData);
@@ -401,7 +430,7 @@ const RiskMap = () => {
             zIndex: 1,
           }}
         >
-          <Typography variant="h6">North Brabant Accidents</Typography>
+          <Typography variant="h6">Rijkswaterstaat Accidents</Typography>
         </Box>
 
         <List>
@@ -533,15 +562,25 @@ const RiskMap = () => {
             <AccidentLocationListItem
               key={location.ID}
               name={location.Weg}
-              location={
-                [location.Longitude_van, location.Latitude_van] as LngLatLike
-              }
+              location={pointCoordinates(location)}
               zijde={location.Zijde}
               hmpVan={location["Hmp van"]}
               hmpTot={location["Hmp tot"]}
               ovd={location.ovd ? location.ovd.toTimeString() : ""}
-              Starttijd={location.Starttijd.toTimeString()}
-              Einddatum={location.Einddatum.toDateString()}
+              Startdatum={
+                location.Startdatum.getHours() +
+                ":" +
+                location.Startdatum.getMinutes() +
+                " " +
+                location.Startdatum.toDateString()
+              }
+              Einddatum={
+                location.Einddatum.getHours() +
+                ":" +
+                location.Einddatum.getMinutes() +
+                " " +
+                location.Einddatum.toDateString()
+              }
               Eerste_tijd_ter_plaatse={
                 location["Eerste tijd ter plaatse"]
                   ? location["Eerste tijd ter plaatse"].toTimeString()
@@ -552,7 +591,7 @@ const RiskMap = () => {
                   ? location["Laatste eindtijd"].toTimeString()
                   : ""
               }
-              color={location["Hmp tot"] ? "orange" : "red"}
+              color={location["Points"] ? "orange" : "red"}
               Proces={location.Proces}
               Melder={location.Melder}
             />

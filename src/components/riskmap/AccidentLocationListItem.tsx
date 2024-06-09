@@ -16,7 +16,7 @@ interface AccidentLocationListItemProps {
   hmpVan: number;
   hmpTot: number;
   ovd: string;
-  Starttijd: string;
+  Startdatum: string;
   Einddatum: string;
   Eerste_tijd_ter_plaatse: string;
   Laatste_eindtijd: string;
@@ -32,7 +32,7 @@ const AccidentLocationListItem = ({
   hmpVan,
   hmpTot,
   ovd,
-  Starttijd,
+  Startdatum,
   Einddatum,
   Eerste_tijd_ter_plaatse,
   Laatste_eindtijd,
@@ -42,11 +42,17 @@ const AccidentLocationListItem = ({
 }: AccidentLocationListItemProps) => {
   const dispatch = useDispatch();
 
+  if (Proces === "null") Proces = "Unknown";
+  if (Melder === "null") Melder = "Unknown";
   return (
-    <div style={{ width: '100%'}}>
+    <div style={{ width: "100%" }}>
       {" "}
       {/* Set the desired width */}
-      <ListItem button onClick={() => dispatch(updateFlyToLocation(location))} sx={{ alignItems: 'flex-start' }} >
+      <ListItem
+        button
+        onClick={() => dispatch(updateFlyToLocation(location))}
+        sx={{ alignItems: "flex-start" }}
+      >
         <ListItemIcon sx={{ minWidth: 30, paddingTop: 1.1 }}>
           <Circle sx={{ color: color, fontSize: 16 }} />
         </ListItemIcon>
@@ -64,7 +70,7 @@ const AccidentLocationListItem = ({
               <Typography variant="body2" component="div">
                 <b>HMP van:</b> {hmpVan}
               </Typography>
-              {hmpTot && (
+              {hmpTot && !isNaN(hmpTot) && (
                 <>
                   <Typography variant="body2" component="div">
                     <b>HMP tot:</b> {hmpTot}
@@ -72,10 +78,10 @@ const AccidentLocationListItem = ({
                 </>
               )}
               <Typography variant="body2" component="div">
-                <b>Starttijd:</b> {Starttijd.split(" ")[0]}
+                <b>Starttijd:</b> {Startdatum}
               </Typography>
               <Typography variant="body2" component="div">
-                <b>Einddatum:</b> {Einddatum}
+                <b>Eindtijd:</b> {Einddatum}
               </Typography>
               {ovd && (
                 <>
