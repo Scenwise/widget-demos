@@ -82,8 +82,7 @@ const RiskMap = () => {
         if (!(x.Eindtijd instanceof Date) && !(x.Einddatum instanceof Date)) {
           x.Einddatum = x.Startdatum;
           x.Eindtijd = new Date(0);
-        }
-        else {
+        } else {
           const combinedDateTime2 = new Date(x.Einddatum);
           if (x.Eindtijd !== undefined) {
             combinedDateTime2.setHours(x.Eindtijd.getHours());
@@ -414,7 +413,7 @@ const RiskMap = () => {
     selectedStartTime,
     selectedEndTime,
   ]);
-  
+
   // To access the accidents, use accidents.current
   return (
     <Stack direction="row" alignItems="stretch" height={600} width={1200}>
@@ -481,7 +480,7 @@ const RiskMap = () => {
           >
             <Typography
               variant="body2"
-              sx={{paddingLeft: 9, paddingRight: 3 }}
+              sx={{ paddingLeft: 9, paddingRight: 3 }}
             >
               Filter by Process:
             </Typography>
@@ -521,7 +520,7 @@ const RiskMap = () => {
           <Box display="flex" alignItems="center" sx={{ width: "100%" }}>
             <Typography
               variant="body2"
-              sx={{paddingLeft: 10, paddingRight: 3 }}
+              sx={{ paddingLeft: 10, paddingRight: 3 }}
             >
               Filter by Road:
             </Typography>
