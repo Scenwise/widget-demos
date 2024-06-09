@@ -65,23 +65,23 @@ const AccidentLocationListItem = ({
           secondary={
             <>
               <Typography variant="body2" component="div">
-                <b>Zijde:</b> {zijde}
+                <b>Road side:</b> {zijde}
               </Typography>
               <Typography variant="body2" component="div">
-                <b>HMP van:</b> {hmpVan}
+                <b>From HMP:</b> {hmpVan}
               </Typography>
               {hmpTot && !isNaN(hmpTot) && (
                 <>
                   <Typography variant="body2" component="div">
-                    <b>HMP tot:</b> {hmpTot}
+                    <b>To HMP:</b> {hmpTot}
                   </Typography>
                 </>
               )}
               <Typography variant="body2" component="div">
-                <b>Starttijd:</b> {Startdatum}
+                <b>Start time:</b> {Startdatum}
               </Typography>
               <Typography variant="body2" component="div">
-                <b>Eindtijd:</b> {Einddatum}
+                <b>End time:</b> {Einddatum}
               </Typography>
               {ovd && (
                 <>
@@ -93,23 +93,23 @@ const AccidentLocationListItem = ({
               {Laatste_eindtijd && (
                 <>
                   <Typography variant="body2" component="div">
-                    <b>Laatste eindtijd:</b> {Laatste_eindtijd.split(" ")[0]}
+                    <b>Latest end time:</b> {Laatste_eindtijd.split(" ")[0]}
                   </Typography>
                 </>
               )}
               {Eerste_tijd_ter_plaatse && (
                 <>
                   <Typography variant="body2" component="div">
-                    <b>Eerste tijd ter plaatse:</b>{" "}
+                    <b>First time on site:</b>{" "}
                     {Eerste_tijd_ter_plaatse.split(" ")[0]}
                   </Typography>
                 </>
               )}
               <Typography variant="body2" component="div">
-                <b>Proces:</b> {Proces}
+                <b>Reason:</b> {Proces}
               </Typography>
               <Typography variant="body2" component="div">
-                <b>Melder:</b> {Melder}
+                <b>Reporter:</b> {Melder}
               </Typography>
             </>
           }
