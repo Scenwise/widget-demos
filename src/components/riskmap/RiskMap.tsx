@@ -201,25 +201,12 @@ const RiskMap = () => {
           paint: {
             // All points have the same weight (equal importance)
             "heatmap-weight": 1,
-            // Increase the heatmap color weight weight by zoom level
-            // heatmap-intensity is a multiplier on top of heatmap-weight
-            "heatmap-intensity": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0,
-              0.3,
-              9,
-              2,
-            ],
             "heatmap-color": [
               "interpolate",
               ["linear"],
               ["heatmap-density"],
               0,
-              "rgba(0, 0, 255, 0)", // Transparent blue for density 0
-              0.1,
-              "#0000FF", // Pure blue for density 0.1
+              "rgba(0, 0, 255, 0)", // Transparent for density 0
               0.2,
               "#00FFFF", // Cyan for density 0.2
               0.3,
@@ -246,20 +233,21 @@ const RiskMap = () => {
               ["linear"],
               ["zoom"],
               0,
-              1,
-              9,
-              20,
-            ],
-            // Transition from heatmap to circle layer by zoom level
-            "heatmap-opacity": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              6,
-              1,
-              9,
-              0.3,
-            ],
+              0.1,
+              7,
+              12,
+            ],              
+          // Transition from heatmap to circle layer by zoom level
+          "heatmap-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            7,
+            0.95,
+            12,
+            0.1,
+          ]
+
           },
         });
       }
