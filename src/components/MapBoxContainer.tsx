@@ -52,11 +52,13 @@ function MapBoxContainer({ mapState, location, zoomLevel }: MapBoxContainerProps
 
     const map = new mapboxgl.Map({
       container: mapContainer.current as string | HTMLElement,
-      style: 'mapbox://styles/ecuzmici/ckxhpe0qo0dkn14lqf9upyv45',
+      style: 'mapbox://styles/mapbox/streets-v12',
       center,
       zoom,
     });
 
+    map.addControl(new mapboxgl.NavigationControl());
+    
     map.on('load', async () => {
       setMap(map);
     });

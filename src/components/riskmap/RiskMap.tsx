@@ -415,7 +415,7 @@ const RiskMap = () => {
 
   // To access the accidents, use accidents.current
   return (
-    <Stack direction="row" alignItems="stretch" height={500} width={1000}>
+    <Stack direction="row" alignItems="stretch" height={600} width={1200}>
       <Paper
         elevation={0}
         sx={{ width: "40%", position: "relative", overflow: "auto" }}
@@ -434,7 +434,7 @@ const RiskMap = () => {
         </Box>
 
         <List>
-          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 0.6 }}>
+          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 1.5 }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 sx={{ width: "49%", zIndex: 0 }}
@@ -456,7 +456,7 @@ const RiskMap = () => {
             <Box
               display="flex"
               alignItems="center"
-              sx={{ paddingLeft: 3, width: "50%" }}
+              sx={{ paddingLeft: 7, width: "50%" }}
             >
               <Typography variant="body2">Show Points</Typography>
               <Switch
@@ -479,9 +479,9 @@ const RiskMap = () => {
           >
             <Typography
               variant="body2"
-              sx={{ width: "30%", paddingLeft: 3, paddingRight: 1 }}
+              sx={{paddingLeft: 9, paddingRight: 3 }}
             >
-              Filter by Process
+              Filter by Process:
             </Typography>
             <Select
               multiple
@@ -497,7 +497,7 @@ const RiskMap = () => {
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                height: 30,
+                height: 35,
                 padding: 0,
               }}
               MenuProps={{
@@ -519,9 +519,9 @@ const RiskMap = () => {
           <Box display="flex" alignItems="center" sx={{ width: "100%" }}>
             <Typography
               variant="body2"
-              sx={{ width: "30%", paddingLeft: 3, paddingRight: 1 }}
+              sx={{paddingLeft: 10, paddingRight: 3 }}
             >
-              Filter by Road
+              Filter by Road:
             </Typography>
             <Select
               multiple
@@ -537,7 +537,7 @@ const RiskMap = () => {
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                height: 30,
+                height: 35,
                 padding: 0,
               }}
               MenuProps={{
@@ -604,7 +604,7 @@ const RiskMap = () => {
           <MapBoxContainer
             mapState={[map, setMap]}
             location={[5.025243, 51.567082] as LngLatLike}
-            zoomLevel={8}
+            zoomLevel={7}
           />
         </Box>
       </Box>
