@@ -14,18 +14,26 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState, useMemo } from "react";
 import * as XLSX from "xlsx";
 import { AccidentData } from "../../data/interfaces/AccidentData";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
-import { LngLatLike } from "mapbox-gl";
+import { LngLatLike, SkyLayer } from "mapbox-gl";
 import featureCollectionConverter, {
   pointCoordinates,
 } from "./featureCollectionConverter";
 import MapBoxContainer from "../MapBoxContainer";
 import AccidentLocationListItem from "./AccidentLocationListItem";
+
+import accidentsLayerPointLayer from './layers/accidentsLayerPointLayer.json';
+import accidentsLayerSegmentLayer from './layers/accidentsLayerSegmentLayer.json';
+
+import { AnyLayer } from 'mapbox-gl';
+import { heatmapLayer } from "./layers/accidentsHeatmapLayer";
 
 const RiskMap = () => {
   // Parse the Excel file to retrieve the accidents
@@ -53,6 +61,18 @@ const RiskMap = () => {
   >([]);
   const [heatmapVisible, setHeatmapVisible] = useState(true);
   const [pointsVisible, setPointsVisible] = useState(true);
+
+  const [selectedDirections, setSelectedDirections] = useState<string[]>(['L', 'M', 'R']);
+
+
+  const handleDirectionChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newDirections: string[]
+  ) => {
+    if (newDirections) {
+      setSelectedDirections(newDirections);
+    }
+  };
 
   useEffect(() => {
     // if (!map) return;
@@ -159,34 +179,13 @@ const RiskMap = () => {
           type: "geojson",
           data: geoJSONDataPoint as GeoJSON.FeatureCollection,
         });
-        map.addLayer({
-          id: "accidentsLayerPoint",
-          type: "circle",
-          source: "accidentsLocationsSourcePoint",
-          layout: {},
-          paint: {
-            "circle-color": "red",
-            "circle-radius": 6,
-            "circle-stroke-color": "#FFF",
-            "circle-stroke-width": 2,
-          },
-        });
+        map.addLayer(accidentsLayerPointLayer as AnyLayer);
 
         map.addSource("accidentsLocationsSourceSegment", {
           type: "geojson",
           data: geoJSONDataSegment as GeoJSON.FeatureCollection,
         });
-        map.addLayer({
-          id: "accidentsLayerSegment",
-          type: "line",
-          source: "accidentsLocationsSourceSegment",
-          layout: {},
-          paint: {
-            "line-color": "orange",
-            "line-width": 3,
-            "line-opacity": 1,
-          },
-        });
+        map.addLayer(accidentsLayerSegmentLayer as AnyLayer);
       }
       // Add heatmap
       if (heatmapVisible) {
@@ -194,62 +193,7 @@ const RiskMap = () => {
           type: "geojson",
           data: geoJSONDataHeatmap as GeoJSON.FeatureCollection,
         });
-        map.addLayer({
-          id: "accidentsHeatmap",
-          type: "heatmap",
-          source: "accidentsSourceHeatmap",
-          paint: {
-            // All points have the same weight (equal importance)
-            "heatmap-weight": 1,
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
-              0,
-              "rgba(0, 0, 255, 0)", // Transparent for density 0
-              0.2,
-              "#00FFFF", // Cyan for density 0.2
-              0.3,
-              "#00FF7F", // Spring Green for density 0.3
-              0.4,
-              "#00FF00", // Pure green for density 0.4
-              0.5,
-              "#7FFF00", // Chartreuse for density 0.5
-              0.6,
-              "#ADFF2F", // Green-yellow for density 0.6
-              0.7,
-              "#FFFF00", // Yellow for density 0.7
-              0.8,
-              "#FFA500", // Orange for density 0.8
-              0.9,
-              "#FF4500", // Red-orange for density 0.9
-              1,
-              "#FF0000", // Pure red for density 1
-            ],
-
-            // Adjust the heatmap radius by zoom level
-            "heatmap-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0,
-              0.1,
-              7,
-              12,
-            ],              
-          // Transition from heatmap to circle layer by zoom level
-          "heatmap-opacity": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            7,
-            0.95,
-            12,
-            0.1,
-          ]
-
-          },
-        });
+        map.addLayer(heatmapLayer('accidentsHeatmap', 'accidentsSourceHeatmap') as AnyLayer);
       }
     };
 
@@ -460,6 +404,33 @@ const RiskMap = () => {
                 onChange={handleHeatmapSwitchChange}
               />
             </Box>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="center"
+            sx={{ width: "100%", paddingBottom: 1 }}
+          >
+              <Typography
+                variant="body2"
+                sx={{ paddingLeft: 9, paddingRight: 3 }}
+              >
+                Filter by road direction:
+              </Typography>
+
+            <ToggleButtonGroup
+              color='primary'
+              value={selectedDirections}
+              onChange={handleDirectionChange}
+              aria-label='directions'
+              size='small'
+              sx={{ width: 'fit-content'}}
+            >
+              {['L', 'M', 'R'].map((direction) => (
+                <ToggleButton key={direction} value={direction} aria-label={direction} sx={{ width: '30px' }}>
+                  {direction}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
           </Box>
           <Box
             display="flex"
