@@ -27,10 +27,14 @@ import featureCollectionConverter, {
 import MapBoxContainer from "../MapBoxContainer";
 import AccidentLocationListItem from "./AccidentLocationListItem";
 
-const RiskMap = () => {
+interface RiskMapProps {
+  title: string,
+  filePath: string,
+  zoom: number
+}
+
+const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
   // Parse the Excel file to retrieve the accidents
-  const filePath = "./accidents-excel/Rijkswaterstaat-accidents.xlsx";
-  // const filePath = "./accidents-excel/brabant2022.xlsx";
   const [accidentData, setAccidentData] = useState<Array<AccidentData>>([]);
   const [loading, setLoading] = useState(true);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -128,6 +132,7 @@ const RiskMap = () => {
       setLoading(false);
     };
     fetchData();
+  //eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -419,7 +424,7 @@ const RiskMap = () => {
             zIndex: 1,
           }}
         >
-          <Typography variant="h6">Rijkswaterstaat Accidents</Typography>
+          <Typography variant="h6">{title} Accidents</Typography>
         </Box>
 
         <List>
@@ -581,7 +586,7 @@ const RiskMap = () => {
           <MapBoxContainer
             mapState={[map, setMap]}
             location={[5.025243, 51.567082] as LngLatLike}
-            zoomLevel={7}
+            zoomLevel={zoom}
           />
         </Box>
       </Box>

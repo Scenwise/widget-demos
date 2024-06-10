@@ -61,7 +61,7 @@ function MapBoxContainer({
 
     const map = new mapboxgl.Map({
       container: mapContainer.current as string | HTMLElement,
-      style: "mapbox://styles/mapbox/streets-v12",
+      style: "mapbox://styles/luningtang/cltierk1i003s01ph7l3scvyx",
       center,
       zoom,
     });
