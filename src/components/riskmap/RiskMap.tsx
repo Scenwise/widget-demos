@@ -21,13 +21,16 @@ import { AccidentData } from "../../data/interfaces/AccidentData";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { LngLatLike } from "mapbox-gl";
-import featureCollectionConverter from "./featureCollectionConverter";
+import featureCollectionConverter, {
+  pointCoordinates,
+} from "./featureCollectionConverter";
 import MapBoxContainer from "../MapBoxContainer";
 import AccidentLocationListItem from "./AccidentLocationListItem";
 
 const RiskMap = () => {
   // Parse the Excel file to retrieve the accidents
-  const filePath = "./accidents-excel/brabant2022.xlsx";
+  const filePath = "./accidents-excel/Rijkswaterstaat-accidents.xlsx";
+  // const filePath = "./accidents-excel/brabant2022.xlsx";
   const [accidentData, setAccidentData] = useState<Array<AccidentData>>([]);
   const [loading, setLoading] = useState(true);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -65,12 +68,39 @@ const RiskMap = () => {
         worksheet
       ) as Array<AccidentData>;
 
+      // Process Date parsing problems
+      JSONdata.forEach((x) => {
+        const combinedDateTime = new Date(x.Starttijd);
+        if (x.Startdatum !== undefined) {
+          combinedDateTime.setFullYear(x.Startdatum.getFullYear());
+          combinedDateTime.setMonth(x.Startdatum.getMonth());
+          combinedDateTime.setDate(x.Startdatum.getDate());
+        }
+        x.Startdatum = combinedDateTime;
+        x.Starttijd = new Date(0);
+
+        if (!(x.Eindtijd instanceof Date) && !(x.Einddatum instanceof Date)) {
+          x.Einddatum = x.Startdatum;
+          x.Eindtijd = new Date(0);
+        } else {
+          const combinedDateTime2 = new Date(x.Einddatum);
+          if (x.Eindtijd !== undefined) {
+            combinedDateTime2.setHours(x.Eindtijd.getHours());
+            combinedDateTime2.setMinutes(x.Eindtijd.getMinutes());
+            combinedDateTime2.setSeconds(x.Eindtijd.getSeconds());
+          }
+
+          x.Einddatum = combinedDateTime2;
+          x.Eindtijd = new Date(0);
+        }
+      });
       // Set the accident data
       setAccidentData(JSONdata);
       setFilteredAccidentData(JSONdata);
 
       // Set the start time for the accidents as the lowest start time
-      const startTimes = JSONdata.map((x) => x.Starttijd.getTime());
+
+      const startTimes = JSONdata.map((x) => x.Startdatum.getTime());
       const minStart = new Date(Math.min(...startTimes));
       setSelectedStartTime(dayjs(minStart));
 
@@ -171,25 +201,12 @@ const RiskMap = () => {
           paint: {
             // All points have the same weight (equal importance)
             "heatmap-weight": 1,
-            // Increase the heatmap color weight weight by zoom level
-            // heatmap-intensity is a multiplier on top of heatmap-weight
-            "heatmap-intensity": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0,
-              0.3,
-              9,
-              2,
-            ],
             "heatmap-color": [
               "interpolate",
               ["linear"],
               ["heatmap-density"],
               0,
-              "rgba(0, 0, 255, 0)", // Transparent blue for density 0
-              0.1,
-              "#0000FF", // Pure blue for density 0.1
+              "rgba(0, 0, 255, 0)", // Transparent for density 0
               0.2,
               "#00FFFF", // Cyan for density 0.2
               0.3,
@@ -216,20 +233,21 @@ const RiskMap = () => {
               ["linear"],
               ["zoom"],
               0,
-              1,
-              9,
-              20,
-            ],
-            // Transition from heatmap to circle layer by zoom level
-            "heatmap-opacity": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              6,
-              1,
-              9,
-              0.3,
-            ],
+              0.1,
+              7,
+              12,
+            ],              
+          // Transition from heatmap to circle layer by zoom level
+          "heatmap-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            7,
+            0.95,
+            12,
+            0.1,
+          ]
+
           },
         });
       }
@@ -370,9 +388,9 @@ const RiskMap = () => {
     // Filter based on start and end time
     filteredData = filteredData.filter(
       (location) =>
-        location.Starttijd.getTime() >=
+        location.Startdatum.getTime() >=
           (selectedStartTime === null ? 0 : selectedStartTime.unix()) * 1000 &&
-        location.Starttijd.getTime() <=
+        location.Startdatum.getTime() <=
           (selectedEndTime === null ? 0 : selectedEndTime.unix()) * 1000
     );
     setFilteredAccidentData(filteredData);
@@ -386,7 +404,7 @@ const RiskMap = () => {
 
   // To access the accidents, use accidents.current
   return (
-    <Stack direction="row" alignItems="stretch" height={500} width={1000}>
+    <Stack direction="row" alignItems="stretch" height={600} width={1200}>
       <Paper
         elevation={0}
         sx={{ width: "40%", position: "relative", overflow: "auto" }}
@@ -401,11 +419,11 @@ const RiskMap = () => {
             zIndex: 1,
           }}
         >
-          <Typography variant="h6">North Brabant Accidents</Typography>
+          <Typography variant="h6">Rijkswaterstaat Accidents</Typography>
         </Box>
 
         <List>
-          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 0.6 }}>
+          <Box sx={{ width: "98%", paddingTop: 2, paddingLeft: 1.5 }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 sx={{ width: "49%", zIndex: 0 }}
@@ -427,7 +445,7 @@ const RiskMap = () => {
             <Box
               display="flex"
               alignItems="center"
-              sx={{ paddingLeft: 3, width: "50%" }}
+              sx={{ paddingLeft: 7, width: "50%" }}
             >
               <Typography variant="body2">Show Points</Typography>
               <Switch
@@ -450,9 +468,9 @@ const RiskMap = () => {
           >
             <Typography
               variant="body2"
-              sx={{ width: "30%", paddingLeft: 3, paddingRight: 1 }}
+              sx={{ paddingLeft: 9, paddingRight: 3 }}
             >
-              Filter by Process
+              Filter by Process:
             </Typography>
             <Select
               multiple
@@ -468,7 +486,7 @@ const RiskMap = () => {
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                height: 30,
+                height: 35,
                 padding: 0,
               }}
               MenuProps={{
@@ -490,9 +508,9 @@ const RiskMap = () => {
           <Box display="flex" alignItems="center" sx={{ width: "100%" }}>
             <Typography
               variant="body2"
-              sx={{ width: "30%", paddingLeft: 3, paddingRight: 1 }}
+              sx={{ paddingLeft: 10, paddingRight: 3 }}
             >
-              Filter by Road
+              Filter by Road:
             </Typography>
             <Select
               multiple
@@ -508,7 +526,7 @@ const RiskMap = () => {
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                height: 30,
+                height: 35,
                 padding: 0,
               }}
               MenuProps={{
@@ -533,15 +551,13 @@ const RiskMap = () => {
             <AccidentLocationListItem
               key={location.ID}
               name={location.Weg}
-              location={
-                [location.Longitude_van, location.Latitude_van] as LngLatLike
-              }
+              location={pointCoordinates(location)}
               zijde={location.Zijde}
               hmpVan={location["Hmp van"]}
               hmpTot={location["Hmp tot"]}
               ovd={location.ovd ? location.ovd.toTimeString() : ""}
-              Starttijd={location.Starttijd.toTimeString()}
-              Einddatum={location.Einddatum.toDateString()}
+              Startdatum={location.Einddatum.toLocaleString("nl-NL")}
+              Einddatum={location.Einddatum.toLocaleString("nl-NL")}
               Eerste_tijd_ter_plaatse={
                 location["Eerste tijd ter plaatse"]
                   ? location["Eerste tijd ter plaatse"].toTimeString()
@@ -552,7 +568,7 @@ const RiskMap = () => {
                   ? location["Laatste eindtijd"].toTimeString()
                   : ""
               }
-              color={location["Hmp tot"] ? "orange" : "red"}
+              color={location["Points"] ? "orange" : "red"}
               Proces={location.Proces}
               Melder={location.Melder}
             />
@@ -565,7 +581,7 @@ const RiskMap = () => {
           <MapBoxContainer
             mapState={[map, setMap]}
             location={[5.025243, 51.567082] as LngLatLike}
-            zoomLevel={8}
+            zoomLevel={7}
           />
         </Box>
       </Box>

@@ -27,13 +27,13 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && (
         <Box
-        sx={{
-          width: "100vw",
-          height: "90vh",
-          placeItems: "center",
-          display: "grid",
-        }}
-        className="boxy"
+          sx={{
+            width: "100vw",
+            height: "90vh",
+            placeItems: "center",
+            display: "grid",
+          }}
+          className="boxy"
         >
           {children}
         </Box>
@@ -62,10 +62,10 @@ function App() {
         width: "100vw",
         height: "100vh",
         placeItems: "center",
-        display: "grid"
+        display: "grid",
       }}
     >
-      <Tabs
+      {/* <Tabs
         value={value}
         onChange={handleChange}
       >
@@ -88,7 +88,10 @@ function App() {
         <WidgetWrapper>
           <IntersectionDashboard />
         </WidgetWrapper>
-      </TabPanel>
+      </TabPanel> */}
+      <WidgetWrapper>
+        <RiskMap />
+      </WidgetWrapper>
     </Box>
   );
 }
