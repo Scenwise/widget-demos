@@ -4,9 +4,9 @@
 export type AccidentData = {
   ID: number; // id
   Starttijd: Date; // start time, access value with: accidents.current[i].Startdatum.toString()
-  Eindtijd: Date; // start date
-  Startdatum: Date; // end time
-  Einddatum: Date; // end date
+  Eindtijd: Date; // end time (only for RWS)
+  Startdatum: Date; // start date (only for RWS)
+  Einddatum: Date; // end date 
   Weg: string; // road
   Zijde: string; // road side
   "Hmp van": number; // start hectometer, access with: accidents[i]['Hmp van']
