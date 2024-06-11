@@ -33,45 +33,41 @@ const AccidentLocationList: React.FC<AccidentLocationListProps> = ({ filteredAcc
   }
 
   return (
-    <AutoSizer disableWidth>
-      {({ height }: { height: number }) => (
-        <Virtuoso
-          ref={virtuosoRef}
-          style={{ height: `${height}px` }}
-          totalCount={filteredAccidentData.length}
-          itemContent={(index: number) => {
-            const location = filteredAccidentData[index];
-            return (
-              <AccidentLocationListItem
-                key={location.ID}
-                id={location.ID + ''}
-                name={location.Weg}
-                location={pointCoordinates(location)}
-                zijde={location.Zijde}
-                hmpVan={location["Hmp van"]}
-                hmpTot={location["Hmp tot"]}
-                ovd={location.ovd ? location.ovd.toTimeString() : ""}
-                Startdatum={location.Einddatum.toLocaleString("nl-NL")}
-                Einddatum={location.Einddatum.toLocaleString("nl-NL")}
-                Eerste_tijd_ter_plaatse={
-                  location["Eerste tijd ter plaatse"]
-                    ? location["Eerste tijd ter plaatse"].toTimeString()
-                    : ""
-                }
-                Laatste_eindtijd={
-                  location["Laatste eindtijd"]
-                    ? location["Laatste eindtijd"].toTimeString()
-                    : ""
-                }
-                color={location["Points"] ? "orange" : "red"}
-                Proces={location.Proces}
-                Melder={location.Melder}
-              />
-            );
-          }}
-        />
-      )}
-    </AutoSizer>
+    <Virtuoso
+      ref={virtuosoRef}
+      style={{ height: `230px` }}
+      totalCount={filteredAccidentData.length}
+      itemContent={(index: number) => {
+        const location = filteredAccidentData[index];
+        return (
+          <AccidentLocationListItem
+            key={location.ID}
+            id={location.ID + ''}
+            name={location.Weg}
+            location={pointCoordinates(location)}
+            zijde={location.Zijde}
+            hmpVan={location["Hmp van"]}
+            hmpTot={location["Hmp tot"]}
+            ovd={location.ovd ? location.ovd.toTimeString() : ""}
+            Startdatum={location.Einddatum.toLocaleString("nl-NL")}
+            Einddatum={location.Einddatum.toLocaleString("nl-NL")}
+            Eerste_tijd_ter_plaatse={
+              location["Eerste tijd ter plaatse"]
+                ? location["Eerste tijd ter plaatse"].toTimeString()
+                : ""
+            }
+            Laatste_eindtijd={
+              location["Laatste eindtijd"]
+                ? location["Laatste eindtijd"].toTimeString()
+                : ""
+            }
+            color={location["Points"] ? "orange" : "red"}
+            Proces={location.Proces}
+            Melder={location.Melder}
+          />
+        );
+      }}
+    />
   );
 };
 
