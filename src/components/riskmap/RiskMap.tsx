@@ -63,16 +63,27 @@ const RiskMap = () => {
   const [heatmapVisible, setHeatmapVisible] = useState(true);
   const [pointsVisible, setPointsVisible] = useState(true);
 
-  const [selectedDirections, setSelectedDirections] = useState<string[]>(['L', 'M', 'R']);
-
-  const isMapInitialized = useRef<boolean>(false);
+  const directionOptions = ['L', 'R', 'Both']
+  const [selectedDirections, setSelectedDirections] = useState<string[]>(['Both']);
 
   const handleDirectionChange = (
     event: React.MouseEvent<HTMLElement>,
     newDirections: string[]
   ) => {
-    if (newDirections) {
-      setSelectedDirections(newDirections);
+    const lastPressed = (event.currentTarget as HTMLButtonElement).value;
+
+    if (lastPressed === 'Both') {
+      setSelectedDirections((prevDirections) => 
+        prevDirections.includes('Both') ? [] : ['Both']
+      );
+    } else {
+      setSelectedDirections((prevDirections) => {
+        if (prevDirections.includes('Both')) {
+          return [lastPressed];
+        } else {
+          return newDirections;
+        }
+      });
     }
   };
 
@@ -157,8 +168,8 @@ const RiskMap = () => {
 
   useSelectAccident(map, geoJSONDataHeatmap);
 
-  const allLayers = ['accidentsLayerPoint', 'accidentsLayerSegment', 'accidentsHeatmapLeft', 'accidentsHeatmapRight', 'accidentsHeatmapMiddle']
-  const allSources = ['accidentsLocationsSourcePoint', 'accidentsLocationsSourceSegment', 'accidentsSourceHeatmapLeft', 'accidentsSourceHeatmapRight', 'accidentsSourceHeatmapMiddle']
+  const allLayers = ['accidentsLayerPoint', 'accidentsLayerSegment', 'accidentsHeatmapLeft', 'accidentsHeatmapRight', 'accidentsHeatmapAll']
+  const allSources = ['accidentsLocationsSourcePoint', 'accidentsLocationsSourceSegment', 'accidentsSourceHeatmapLeft', 'accidentsSourceHeatmapRight', 'accidentsSourceHeatmapAll']
   const dataLayers = ['accidentsLayerPoint', 'accidentsLayerSegment']
   const heatMapLayers = ['accidentsHeatmapLeft', 'accidentsHeatmapRight']
 
@@ -180,52 +191,46 @@ const RiskMap = () => {
       }
 
       // Add the sources and layers to the map
-      if (pointsVisible) {
-        map.addSource("accidentsLocationsSourcePoint", {
-          type: "geojson",
-          data: geoJSONDataPoint as GeoJSON.FeatureCollection,
-        });
-        map.addLayer(accidentsLayerPointLayer as AnyLayer);
+      map.addSource("accidentsLocationsSourcePoint", {
+        type: "geojson",
+        data: geoJSONDataPoint as GeoJSON.FeatureCollection,
+      });
+      map.addLayer(accidentsLayerPointLayer as AnyLayer);
 
-        map.addSource("accidentsLocationsSourceSegment", {
-          type: "geojson",
-          data: geoJSONDataSegment as GeoJSON.FeatureCollection,
-        });
-        map.addLayer(accidentsLayerSegmentLayer as AnyLayer);
-      }
+      map.addSource("accidentsLocationsSourceSegment", {
+        type: "geojson",
+        data: geoJSONDataSegment as GeoJSON.FeatureCollection,
+      });
+      map.addLayer(accidentsLayerSegmentLayer as AnyLayer);
 
-      if (selectedDirections.includes('L')) {
-        const geoJSONDataHeatmapLeft = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
-        geoJSONDataHeatmapLeft.features = geoJSONDataHeatmapLeft.features.filter(feature => feature.properties?.zijde === 'L')
+      const geoJSONDataHeatmapLeft = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+      geoJSONDataHeatmapLeft.features = geoJSONDataHeatmapLeft.features.filter(feature => feature.properties?.zijde === 'L')
 
-        map.addSource("accidentsSourceHeatmapLeft", {
-          type: "geojson",
-          data: geoJSONDataHeatmapLeft as GeoJSON.FeatureCollection,
-        });
-        map.addLayer(heatmapLayer('accidentsHeatmapLeft', 'accidentsSourceHeatmapLeft') as AnyLayer);
-      }
+      map.addSource("accidentsSourceHeatmapLeft", {
+        type: "geojson",
+        data: geoJSONDataHeatmapLeft as GeoJSON.FeatureCollection,
+      });
+      map.addLayer(heatmapLayer('accidentsHeatmapLeft', 'accidentsSourceHeatmapLeft') as AnyLayer);
 
-      if (selectedDirections.includes('R')) {
-        const geoJSONDataHeatmapRight = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
-        geoJSONDataHeatmapRight.features = geoJSONDataHeatmapRight.features.filter(feature => feature.properties?.zijde === 'R')
 
-        map.addSource("accidentsSourceHeatmapRight", {
-          type: "geojson",
-          data: geoJSONDataHeatmapRight as GeoJSON.FeatureCollection,
-        });
-        map.addLayer(heatmapLayer('accidentsHeatmapRight', 'accidentsSourceHeatmapRight') as AnyLayer); 
-      }
+      const geoJSONDataHeatmapRight = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+      geoJSONDataHeatmapRight.features = geoJSONDataHeatmapRight.features.filter(feature => feature.properties?.zijde !== 'L')
 
-      if (selectedDirections.includes('M')) {
-        const geoJSONDataHeatmapMiddle = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
-        geoJSONDataHeatmapMiddle.features = geoJSONDataHeatmapMiddle.features.filter(feature => feature.properties?.zijde !== 'R' && feature.properties?.zijde !== 'L')
+      map.addSource("accidentsSourceHeatmapRight", {
+        type: "geojson",
+        data: geoJSONDataHeatmapRight as GeoJSON.FeatureCollection,
+      });
+      map.addLayer(heatmapLayer('accidentsHeatmapRight', 'accidentsSourceHeatmapRight') as AnyLayer); 
 
-        map.addSource("accidentsSourceHeatmapMiddle", {
-          type: "geojson",
-          data: geoJSONDataHeatmapMiddle as GeoJSON.FeatureCollection,
-        });
-        map.addLayer(heatmapLayer('accidentsHeatmapMiddle', 'accidentsSourceHeatmapMiddle') as AnyLayer); 
-      }
+
+      const geoJSONDataHeatmapAll = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+
+      map.addSource("accidentsSourceHeatmapAll", {
+        type: "geojson",
+        data: geoJSONDataHeatmapAll as GeoJSON.FeatureCollection,
+      });
+      map.addLayer(heatmapLayer('accidentsHeatmapAll', 'accidentsSourceHeatmapAll') as AnyLayer); 
+      
     };
 
     addSourcesAndLayers();
@@ -267,13 +272,21 @@ const RiskMap = () => {
     } else {
       map!.setLayoutProperty('accidentsHeatmapRight', 'visibility', 'none');
     }
-    
-    // Filter points based on selectedDirections
-    dataLayers.forEach(layer => map!.setFilter(layer, [
-      'in',
-      ['get', 'zijde'],
-      ['literal', selectedDirections]
-    ]));
+
+    if (selectedDirections.includes('Both')) {
+      map!.setLayoutProperty('accidentsHeatmapAll', 'visibility', 'visible');
+      dataLayers.forEach(layer => {
+        map!.setFilter(layer, null); // Remove any existing filters
+      });
+    } else {
+      map!.setLayoutProperty('accidentsHeatmapAll', 'visibility', 'none');
+      // Filter points based on selectedDirections
+      dataLayers.forEach(layer => map!.setFilter(layer, [
+        'in',
+        ['get', 'zijde'],
+        ['literal', selectedDirections]
+      ]));
+    }
 
   }, [selectedDirections])
 
@@ -485,8 +498,8 @@ const RiskMap = () => {
               size='small'
               sx={{ width: 'fit-content'}}
             >
-              {['L', 'M', 'R'].map((direction) => (
-                <ToggleButton key={direction} value={direction} aria-label={direction} sx={{ width: '30px' }}>
+              {directionOptions.map((direction) => (
+                <ToggleButton key={direction} value={direction} aria-label={direction} sx={{ width: '60px' }}>
                   {direction}
                 </ToggleButton>
               ))}
