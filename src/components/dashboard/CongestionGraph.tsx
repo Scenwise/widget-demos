@@ -9,7 +9,7 @@ interface State {
 }
 
 function hours() {
-  let arr = [];
+  const arr = [];
   for (let i = 0; i < 24; i++) {
     arr.push(i + ":00");
   }
@@ -17,7 +17,7 @@ function hours() {
 }
 
 function values() {
-  let arr = [];
+  const arr = [];
   for (let i = 0; i < 24; i++) {
     arr.push(Math.floor(Math.random() * 70));
   }

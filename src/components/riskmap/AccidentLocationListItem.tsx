@@ -1,4 +1,3 @@
-import { LngLatLike } from "mapbox-gl";
 import { Circle } from "@mui/icons-material";
 import {
   ListItem,
@@ -13,7 +12,6 @@ import { RootState } from "../../store";
 interface AccidentLocationListItemProps {
   name: string;
   id: string;
-  location: LngLatLike;
   zijde: string;
   hmpVan: number;
   hmpTot: number;
@@ -30,7 +28,6 @@ interface AccidentLocationListItemProps {
 const AccidentLocationListItem = ({
   name,
   id,
-  location,
   zijde,
   hmpVan,
   hmpTot,

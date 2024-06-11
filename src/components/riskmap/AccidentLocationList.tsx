@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import { Typography } from '@mui/material';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import AccidentLocationListItem from './AccidentLocationListItem'; // Import your component
 import { AccidentData } from '../../data/interfaces/AccidentData';
 import { useSelector } from 'react-redux';
-import { pointCoordinates } from './featureCollectionConverter';
 import { RootState } from '../../store';
 
 interface AccidentLocationListProps {
@@ -44,7 +42,6 @@ const AccidentLocationList: React.FC<AccidentLocationListProps> = ({ filteredAcc
             key={location.ID}
             id={location.ID + ''}
             name={location.Weg}
-            location={pointCoordinates(location)}
             zijde={location.Zijde}
             hmpVan={location["Hmp van"]}
             hmpTot={location["Hmp tot"]}
