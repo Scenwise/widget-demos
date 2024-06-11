@@ -7,10 +7,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
-import { updateFlyToLocation } from "./accidentsWidgetSlice";
+import { updateSelectedAccidentID } from "./accidentsWidgetSlice";
 
 interface AccidentLocationListItemProps {
   name: string;
+  id: string;
   location: LngLatLike;
   zijde: string;
   hmpVan: number;
@@ -27,6 +28,7 @@ interface AccidentLocationListItemProps {
 
 const AccidentLocationListItem = ({
   name,
+  id,
   location,
   zijde,
   hmpVan,
@@ -50,7 +52,7 @@ const AccidentLocationListItem = ({
       {/* Set the desired width */}
       <ListItem
         button
-        onClick={() => dispatch(updateFlyToLocation(location))}
+        onClick={() => dispatch(updateSelectedAccidentID(id))}
         sx={{ alignItems: "flex-start" }}
       >
         <ListItemIcon sx={{ minWidth: 30, paddingTop: 1.1 }}>

@@ -18,12 +18,11 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import dayjs, { Dayjs } from "dayjs";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import { AccidentData } from "../../data/interfaces/AccidentData";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store";
-import { LngLatLike, SkyLayer } from "mapbox-gl";
+
+import mapboxgl, { LngLatLike, SkyLayer } from "mapbox-gl";
 import featureCollectionConverter, {
   pointCoordinates,
 } from "./featureCollectionConverter";
@@ -35,8 +34,11 @@ import accidentsLayerSegmentLayer from './layers/accidentsLayerSegmentLayer.json
 
 import { AnyLayer } from 'mapbox-gl';
 import { heatmapLayer } from "./layers/accidentsHeatmapLayer";
+import { useDispatch } from "react-redux";
+import { selectAccidentAction, useSelectAccident } from "./useSelectAccident";
 
 const RiskMap = () => {
+  const dispatch = useDispatch();
   // Parse the Excel file to retrieve the accidents
   const filePath = "./accidents-excel/Rijkswaterstaat-accidents.xlsx";
   // const filePath = "./accidents-excel/brabant2022.xlsx";
@@ -65,6 +67,7 @@ const RiskMap = () => {
 
   const [selectedDirections, setSelectedDirections] = useState<string[]>(['L', 'M', 'R']);
 
+  const isMapInitialized = useRef<boolean>(false);
 
   const handleDirectionChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -150,9 +153,17 @@ const RiskMap = () => {
     };
     fetchData();
   }, []);
+  const validMapLayers = (layers: string[]) => {
+    return map && layers.every(layer => map.getLayer(layer));
+  } 
+
+  useSelectAccident(map, geoJSONDataHeatmap);
 
   const allLayers = ['accidentsLayerPoint', 'accidentsLayerSegment', 'accidentsHeatmapLeft', 'accidentsHeatmapRight', 'accidentsHeatmapMiddle']
   const allSources = ['accidentsLocationsSourcePoint', 'accidentsLocationsSourceSegment', 'accidentsSourceHeatmapLeft', 'accidentsSourceHeatmapRight', 'accidentsSourceHeatmapMiddle']
+  const dataLayers = ['accidentsLayerPoint', 'accidentsLayerSegment']
+  const heatMapLayers = ['accidentsHeatmapLeft', 'accidentsHeatmapRight']
+
   useEffect(() => {
     if (!map) return;
     const addSourcesAndLayers = () => {
@@ -243,15 +254,8 @@ const RiskMap = () => {
     geoJSONDataHeatmap,
   ]);
 
-  const checkMapLayers = (layers: string[]) => {
-    return map && layers.every(layer => map.getLayer(layer));
-  }
-
-  const dataLayers = ['accidentsLayerPoint', 'accidentsLayerSegment']
-  const heatMapLayers = ['accidentsHeatmapLeft', 'accidentsHeatmapRight']
-
   useEffect(() => {
-    if (!checkMapLayers(allLayers)) return;
+    if (!validMapLayers(allLayers)) return;
     
     // Set visibility for heatmap layers based on selectedDirections
     if (selectedDirections.includes('L')) {
@@ -282,7 +286,7 @@ const RiskMap = () => {
   }
 
   useEffect(() => {
-    if (!checkMapLayers(dataLayers)) return;
+    if (!validMapLayers(dataLayers)) return;
     if (pointsVisible) {
       setVisibility(dataLayers, 'visible')
     }
@@ -292,7 +296,7 @@ const RiskMap = () => {
   }, [pointsVisible])
 
   useEffect(() => {
-    if (!checkMapLayers(heatMapLayers)) return;
+    if (!validMapLayers(heatMapLayers)) return;
     if (heatmapVisible) {
       setVisibility(heatMapLayers, 'visible')
     }
@@ -321,20 +325,6 @@ const RiskMap = () => {
       fullFeatureCollection as GeoJSON.FeatureCollection<GeoJSON.Geometry>
     );
   }, [filteredAccidentData]);
-
-  const { flyToLocation } = useSelector(
-    (state: RootState) => state.accidentsWidget
-  );
-
-  /**
-   * Hook for zooming on a specific accident when the user selects it.
-   */
-  useEffect(() => {
-    if (!map) return;
-    if (!flyToLocation) return;
-
-    map.flyTo({ center: flyToLocation, zoom: 14 });
-  }, [map, flyToLocation]);
 
   /**
    * Process filtering handle. Collects the keywords selected by the user and filters the processes by them.
@@ -593,6 +583,7 @@ const RiskMap = () => {
           {filteredAccidentData.map((location) => (
             <AccidentLocationListItem
               key={location.ID}
+              id={location.ID + ''}
               name={location.Weg}
               location={pointCoordinates(location)}
               zijde={location.Zijde}
@@ -625,6 +616,7 @@ const RiskMap = () => {
             mapState={[map, setMap]}
             location={[5.025243, 51.567082] as LngLatLike}
             zoomLevel={7}
+            onLoadFunction={(map: mapboxgl.Map) => selectAccidentAction(map, dispatch)}
           />
         </Box>
       </Box>

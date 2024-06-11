@@ -46,7 +46,7 @@ export const heatmapLayer = (id: string, source: string) => ({
       ["linear"],
       ["zoom"],
       7,
-      0.7,
+      0.9,
       12,
       0.1
     ]

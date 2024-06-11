@@ -1,29 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { LngLatLike } from "mapbox-gl";
 
 export interface AccidentWidgetState {
-  flyToLocation: LngLatLike | undefined;
+  selectedAccidentID: string,
 }
 
 const initialState: AccidentWidgetState = {
-  flyToLocation: undefined,
+  selectedAccidentID: '',
 };
 
 export const accidentWidgetSlice = createSlice({
   name: "accidentWidget",
   initialState,
   reducers: {
-    updateFlyToLocation: (
-      state: AccidentWidgetState,
-      action: PayloadAction<LngLatLike | undefined>
-    ) => {
-      state.flyToLocation = action.payload;
-    },
+    updateSelectedAccidentID: (state: AccidentWidgetState, action: PayloadAction<string>) => {
+      state.selectedAccidentID = action.payload
+    }
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { updateFlyToLocation } = accidentWidgetSlice.actions;
+export const { updateSelectedAccidentID } = accidentWidgetSlice.actions;
 
 export default accidentWidgetSlice.reducer;
