@@ -150,27 +150,23 @@ const RiskMap = () => {
     fetchData();
   }, []);
 
+  const layers = ['accidentsLayerPoint', 'accidentsLayerSegment', 'accidentsHeatmapLeft', 'accidentsHeatmapRight', 'accidentsHeatmapMiddle']
+  const sources = ['accidentsLocationsSourcePoint', 'accidentsLocationsSourceSegment', 'accidentsSourceHeatmapLeft', 'accidentsSourceHeatmapRight', 'accidentsSourceHeatmapMiddle']
   useEffect(() => {
     if (!map) return;
     const addSourcesAndLayers = () => {
-      // Remove the existing sources and layers if they already exist
-      if (map.getLayer("accidentsLayerPoint")) {
-        map.removeLayer("accidentsLayerPoint");
+      for (const layer of layers) {
+        // Remove the existing layers if they already exist
+        if (map.getLayer(layer)) {
+          map.removeLayer(layer);
+        }
       }
-      if (map.getLayer("accidentsLayerSegment")) {
-        map.removeLayer("accidentsLayerSegment");
-      }
-      if (map.getLayer("accidentsHeatmap")) {
-        map.removeLayer("accidentsHeatmap");
-      }
-      if (map.getSource("accidentsLocationsSourcePoint")) {
-        map.removeSource("accidentsLocationsSourcePoint");
-      }
-      if (map.getSource("accidentsLocationsSourceSegment")) {
-        map.removeSource("accidentsLocationsSourceSegment");
-      }
-      if (map.getSource("accidentsSourceHeatmap")) {
-        map.removeSource("accidentsSourceHeatmap");
+
+      for (const source of sources) {
+        // Remove the existing sources if they already exist
+        if (map.getSource(source)) {
+          map.removeSource(source);
+        }
       }
 
       // Add the sources and layers to the map
@@ -187,37 +183,56 @@ const RiskMap = () => {
         });
         map.addLayer(accidentsLayerSegmentLayer as AnyLayer);
       }
-      // Add heatmap
-      if (heatmapVisible) {
-        map.addSource("accidentsSourceHeatmap", {
+
+      if (selectedDirections.includes('L')) {
+        const geoJSONDataHeatmapLeft = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+        geoJSONDataHeatmapLeft.features = geoJSONDataHeatmapLeft.features.filter(feature => feature.properties?.zijde === 'L')
+
+        map.addSource("accidentsSourceHeatmapLeft", {
           type: "geojson",
-          data: geoJSONDataHeatmap as GeoJSON.FeatureCollection,
+          data: geoJSONDataHeatmapLeft as GeoJSON.FeatureCollection,
         });
-        map.addLayer(heatmapLayer('accidentsHeatmap', 'accidentsSourceHeatmap') as AnyLayer);
+        map.addLayer(heatmapLayer('accidentsHeatmapLeft', 'accidentsSourceHeatmapLeft') as AnyLayer);
+      }
+
+      if (selectedDirections.includes('R')) {
+        const geoJSONDataHeatmapRight = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+        geoJSONDataHeatmapRight.features = geoJSONDataHeatmapRight.features.filter(feature => feature.properties?.zijde === 'R')
+
+        map.addSource("accidentsSourceHeatmapRight", {
+          type: "geojson",
+          data: geoJSONDataHeatmapRight as GeoJSON.FeatureCollection,
+        });
+        map.addLayer(heatmapLayer('accidentsHeatmapRight', 'accidentsSourceHeatmapRight') as AnyLayer); 
+      }
+
+      if (selectedDirections.includes('M')) {
+        const geoJSONDataHeatmapMiddle = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+        geoJSONDataHeatmapMiddle.features = geoJSONDataHeatmapMiddle.features.filter(feature => feature.properties?.zijde !== 'R' && feature.properties?.zijde !== 'L')
+
+        map.addSource("accidentsSourceHeatmapMiddle", {
+          type: "geojson",
+          data: geoJSONDataHeatmapMiddle as GeoJSON.FeatureCollection,
+        });
+        map.addLayer(heatmapLayer('accidentsHeatmapMiddle', 'accidentsSourceHeatmapMiddle') as AnyLayer); 
       }
     };
 
     addSourcesAndLayers();
 
     return () => {
-      // Cleanup: remove the sources and layers when the component unmounts
-      if (map.getLayer("accidentsLayerPoint")) {
-        map.removeLayer("accidentsLayerPoint");
+      for (const layer of layers) {
+        // Remove the existing layers if they already exist
+        if (map.getLayer(layer)) {
+          map.removeLayer(layer);
+        }
       }
-      if (map.getLayer("accidentsLayerSegment")) {
-        map.removeLayer("accidentsLayerSegment");
-      }
-      if (map.getLayer("accidentsHeatmap")) {
-        map.removeLayer("accidentsHeatmap");
-      }
-      if (map.getSource("accidentsLocationsSourcePoint")) {
-        map.removeSource("accidentsLocationsSourcePoint");
-      }
-      if (map.getSource("accidentsLocationsSourceSegment")) {
-        map.removeSource("accidentsLocationsSourceSegment");
-      }
-      if (map.getSource("accidentsSourceHeatmap")) {
-        map.removeSource("accidentsSourceHeatmap");
+
+      for (const source of sources) {
+        // Remove the existing sources if they already exist
+        if (map.getSource(source)) {
+          map.removeSource(source);
+        }
       }
     };
   }, [
@@ -227,6 +242,7 @@ const RiskMap = () => {
     geoJSONDataHeatmap,
     heatmapVisible,
     pointsVisible,
+    selectedDirections
   ]);
 
   /**

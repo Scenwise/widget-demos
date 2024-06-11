@@ -1,7 +1,7 @@
 export const heatmapLayer = (id: string, source: string) => ({
-    "id": "accidentsHeatmap",
+    "id": id,
     "type": "heatmap",
-    "source": "accidentsSourceHeatmap",
+    "source": source,
     "paint": {
       // All points have the same weight (equal importance)
       "heatmap-weight": 1,
