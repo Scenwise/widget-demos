@@ -288,7 +288,7 @@ const RiskMap = () => {
       ]));
     }
 
-  }, [selectedDirections])
+  }, [geoJSONDataHeatmap,selectedDirections])
 
   const setVisibility = (layers: string[], value: string) => {
     layers.forEach((layer) => {

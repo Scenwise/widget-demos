@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { Virtuoso } from 'react-virtuoso';
-import { Typography } from '@mui/material';
 import AccidentLocationListItem from './AccidentLocationListItem'; // Import your component
 import { AccidentData } from '../../data/interfaces/AccidentData';
 import { useSelector } from 'react-redux';
@@ -27,7 +26,7 @@ const AccidentLocationList: React.FC<AccidentLocationListProps> = ({ filteredAcc
   }, [selectedAccidentID, filteredAccidentData]);
 
   if (filteredAccidentData.length === 0) {
-    return <Typography variant="h6">No accidents found.</Typography>;
+    return null;
   }
 
   return (
