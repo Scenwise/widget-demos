@@ -22,12 +22,9 @@ import React, { useEffect, useState, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import { AccidentData } from "../../data/interfaces/AccidentData";
 
-import mapboxgl, { LngLatLike, SkyLayer } from "mapbox-gl";
-import featureCollectionConverter, {
-  pointCoordinates,
-} from "./featureCollectionConverter";
+import mapboxgl, { LngLatLike } from "mapbox-gl";
+import featureCollectionConverter from "./featureCollectionConverter";
 import MapBoxContainer from "../MapBoxContainer";
-import AccidentLocationListItem from "./AccidentLocationListItem";
 
 import accidentsLayerPointLayer from './layers/accidentsLayerPointLayer.json';
 import accidentsLayerSegmentLayer from './layers/accidentsLayerSegmentLayer.json';
@@ -36,6 +33,7 @@ import { AnyLayer } from 'mapbox-gl';
 import { heatmapLayer } from "./layers/accidentsHeatmapLayer";
 import { useDispatch } from "react-redux";
 import { selectAccidentAction, useSelectAccident } from "./useSelectAccident";
+import AccidentLocationList from "./AccidentLocationList";
 
 const RiskMap = () => {
   const dispatch = useDispatch();
@@ -579,34 +577,8 @@ const RiskMap = () => {
           <ListSubheader sx={{ top: 45, bgcolor: "background.paper" }}>
             All Accidents
           </ListSubheader>
+          <AccidentLocationList filteredAccidentData={filteredAccidentData}></AccidentLocationList>
 
-          {filteredAccidentData.map((location) => (
-            <AccidentLocationListItem
-              key={location.ID}
-              id={location.ID + ''}
-              name={location.Weg}
-              location={pointCoordinates(location)}
-              zijde={location.Zijde}
-              hmpVan={location["Hmp van"]}
-              hmpTot={location["Hmp tot"]}
-              ovd={location.ovd ? location.ovd.toTimeString() : ""}
-              Startdatum={location.Einddatum.toLocaleString("nl-NL")}
-              Einddatum={location.Einddatum.toLocaleString("nl-NL")}
-              Eerste_tijd_ter_plaatse={
-                location["Eerste tijd ter plaatse"]
-                  ? location["Eerste tijd ter plaatse"].toTimeString()
-                  : ""
-              }
-              Laatste_eindtijd={
-                location["Laatste eindtijd"]
-                  ? location["Laatste eindtijd"].toTimeString()
-                  : ""
-              }
-              color={location["Points"] ? "orange" : "red"}
-              Proces={location.Proces}
-              Melder={location.Melder}
-            />
-          ))}
         </List>
       </Paper>
 

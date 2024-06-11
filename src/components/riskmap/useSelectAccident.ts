@@ -19,9 +19,7 @@ export const selectAccidentAction = (map: mapboxgl.Map, dispatch: Dispatch<any>)
 
 export const useSelectAccident = (map: mapboxgl.Map, geoJSONDataHeatmap:  FeatureCollection<Geometry, GeoJsonProperties>) => {
       
-    const selectedAccidentID = useSelector(
-        (state: RootState) => state.accidentsWidget.selectedAccidentID
-    );
+    const selectedAccidentID = useSelector((state: RootState) => state.accidentsWidget.selectedAccidentID);
 
     useEffect(() => {
         if (map && map.getLayer('accidentsLayerPoint') && selectedAccidentID) {
