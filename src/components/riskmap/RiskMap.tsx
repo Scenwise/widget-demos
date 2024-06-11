@@ -418,6 +418,19 @@ const RiskMap = () => {
     selectedStartTime,
     selectedEndTime,
   ]);
+  
+  const finalListWithDirection = useMemo(() => {
+    if (!selectedDirections.includes('Both')) {
+      return filteredAccidentData.filter(
+        (location) => {
+            return selectedDirections.some((direction => location.Zijde === direction))
+        }
+      );
+    }
+    else {
+      return filteredAccidentData
+    }
+  }, [filteredAccidentData, selectedDirections])
 
   // To access the accidents, use accidents.current
   return (
@@ -588,9 +601,9 @@ const RiskMap = () => {
             </Select>
           </Box>
           <ListSubheader sx={{ top: 45, bgcolor: "background.paper" }}>
-            All Accidents
+            All Accidents ({finalListWithDirection.length})
           </ListSubheader>
-          <AccidentLocationList filteredAccidentData={filteredAccidentData}></AccidentLocationList>
+          <AccidentLocationList filteredAccidentData={finalListWithDirection}></AccidentLocationList>
 
         </List>
       </Paper>

@@ -57,9 +57,9 @@ const AccidentLocationListItem = ({
         onClick={() => dispatch(updateSelectedAccidentID(id))}
         sx={{
           alignItems: "flex-start",
-          backgroundColor: selectedAccidentID === id ? 'lightyellow' : 'inherit',
+          backgroundColor: selectedAccidentID === id ? '#fff8c7' : 'inherit',
           '&:hover': {
-            backgroundColor: 'lightblue',
+            backgroundColor: '#fff8c7',
           },
         }}      >
         <ListItemIcon sx={{ minWidth: 30, paddingTop: 1.1 }}>
