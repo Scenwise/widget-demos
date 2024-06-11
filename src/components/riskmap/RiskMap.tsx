@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Box,
@@ -150,19 +151,19 @@ const RiskMap = () => {
     fetchData();
   }, []);
 
-  const layers = ['accidentsLayerPoint', 'accidentsLayerSegment', 'accidentsHeatmapLeft', 'accidentsHeatmapRight', 'accidentsHeatmapMiddle']
-  const sources = ['accidentsLocationsSourcePoint', 'accidentsLocationsSourceSegment', 'accidentsSourceHeatmapLeft', 'accidentsSourceHeatmapRight', 'accidentsSourceHeatmapMiddle']
+  const allLayers = ['accidentsLayerPoint', 'accidentsLayerSegment', 'accidentsHeatmapLeft', 'accidentsHeatmapRight', 'accidentsHeatmapMiddle']
+  const allSources = ['accidentsLocationsSourcePoint', 'accidentsLocationsSourceSegment', 'accidentsSourceHeatmapLeft', 'accidentsSourceHeatmapRight', 'accidentsSourceHeatmapMiddle']
   useEffect(() => {
     if (!map) return;
     const addSourcesAndLayers = () => {
-      for (const layer of layers) {
+      for (const layer of allLayers) {
         // Remove the existing layers if they already exist
         if (map.getLayer(layer)) {
           map.removeLayer(layer);
         }
       }
 
-      for (const source of sources) {
+      for (const source of allSources) {
         // Remove the existing sources if they already exist
         if (map.getSource(source)) {
           map.removeSource(source);
@@ -221,14 +222,14 @@ const RiskMap = () => {
     addSourcesAndLayers();
 
     return () => {
-      for (const layer of layers) {
+      for (const layer of allLayers) {
         // Remove the existing layers if they already exist
         if (map.getLayer(layer)) {
           map.removeLayer(layer);
         }
       }
 
-      for (const source of sources) {
+      for (const source of allSources) {
         // Remove the existing sources if they already exist
         if (map.getSource(source)) {
           map.removeSource(source);
@@ -240,10 +241,65 @@ const RiskMap = () => {
     geoJSONDataPoint,
     geoJSONDataSegment,
     geoJSONDataHeatmap,
-    heatmapVisible,
-    pointsVisible,
-    selectedDirections
   ]);
+
+  const checkMapLayers = (layers: string[]) => {
+    return map && layers.every(layer => map.getLayer(layer));
+  }
+
+  const dataLayers = ['accidentsLayerPoint', 'accidentsLayerSegment']
+  const heatMapLayers = ['accidentsHeatmapLeft', 'accidentsHeatmapRight']
+
+  useEffect(() => {
+    if (!checkMapLayers(allLayers)) return;
+    
+    // Set visibility for heatmap layers based on selectedDirections
+    if (selectedDirections.includes('L')) {
+      map!.setLayoutProperty('accidentsHeatmapLeft', 'visibility', 'visible');
+    } else {
+      map!.setLayoutProperty('accidentsHeatmapLeft', 'visibility', 'none');
+    }
+
+    if (selectedDirections.includes('R')) {
+      map!.setLayoutProperty('accidentsHeatmapRight', 'visibility', 'visible');
+    } else {
+      map!.setLayoutProperty('accidentsHeatmapRight', 'visibility', 'none');
+    }
+    
+    // Filter points based on selectedDirections
+    dataLayers.forEach(layer => map!.setFilter(layer, [
+      'in',
+      ['get', 'zijde'],
+      ['literal', selectedDirections]
+    ]));
+
+  }, [selectedDirections])
+
+  const setVisibility = (layers: string[], value: string) => {
+    layers.forEach((layer) => {
+      map!.setLayoutProperty(layer, 'visibility', value);
+    })
+  }
+
+  useEffect(() => {
+    if (!checkMapLayers(dataLayers)) return;
+    if (pointsVisible) {
+      setVisibility(dataLayers, 'visible')
+    }
+    else {
+      setVisibility(dataLayers, 'none')
+    }
+  }, [pointsVisible])
+
+  useEffect(() => {
+    if (!checkMapLayers(heatMapLayers)) return;
+    if (heatmapVisible) {
+      setVisibility(heatMapLayers, 'visible')
+    }
+    else {
+      setVisibility(heatMapLayers, 'none')
+    }
+  }, [heatmapVisible])
 
   /**
    * Hook for displaying the filtered data on the map.
