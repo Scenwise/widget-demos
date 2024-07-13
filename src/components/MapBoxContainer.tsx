@@ -27,12 +27,14 @@ interface MapBoxContainerProps {
   mapState: UseState<mapboxgl.Map | null>;
   location: LngLatLike;
   zoomLevel: number;
+  onLoadFunction?: (map: mapboxgl.Map) => void;
 }
 
 function MapBoxContainer({
   mapState,
   location,
   zoomLevel,
+  onLoadFunction
 }: MapBoxContainerProps) {
   const [map, setMap] = mapState;
   const mapContainer = useRef<HTMLDivElement | null>(null);
@@ -70,6 +72,7 @@ function MapBoxContainer({
 
     map.on("load", async () => {
       setMap(map);
+      if (onLoadFunction) onLoadFunction(map);
     });
 
     map.on("move", () => {

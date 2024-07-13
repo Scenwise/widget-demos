@@ -1,4 +1,3 @@
-import { LngLatLike } from "mapbox-gl";
 import { Circle } from "@mui/icons-material";
 import {
   ListItem,
@@ -6,12 +5,13 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import { useDispatch } from "react-redux";
-import { updateFlyToLocation } from "./accidentsWidgetSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { updateSelectedAccidentID } from "./accidentsWidgetSlice";
+import { RootState } from "../../store";
 
 interface AccidentLocationListItemProps {
   name: string;
-  location: LngLatLike;
+  id: string;
   zijde: string;
   hmpVan: number;
   hmpTot: number;
@@ -27,7 +27,7 @@ interface AccidentLocationListItemProps {
 
 const AccidentLocationListItem = ({
   name,
-  location,
+  id,
   zijde,
   hmpVan,
   hmpTot,
@@ -41,6 +41,7 @@ const AccidentLocationListItem = ({
   Melder,
 }: AccidentLocationListItemProps) => {
   const dispatch = useDispatch();
+  const selectedAccidentID = useSelector((state: RootState) => state.accidentsWidget.selectedAccidentID);
 
   if (Proces === "null") Proces = "Unknown";
   if (Melder === "null") Melder = "Unknown";
@@ -50,9 +51,14 @@ const AccidentLocationListItem = ({
       {/* Set the desired width */}
       <ListItem
         button
-        onClick={() => dispatch(updateFlyToLocation(location))}
-        sx={{ alignItems: "flex-start" }}
-      >
+        onClick={() => dispatch(updateSelectedAccidentID(id))}
+        sx={{
+          alignItems: "flex-start",
+          backgroundColor: selectedAccidentID === id ? '#fff8c7' : 'inherit',
+          '&:hover': {
+            backgroundColor: '#fff8c7',
+          },
+        }}      >
         <ListItemIcon sx={{ minWidth: 30, paddingTop: 1.1 }}>
           <Circle sx={{ color: color, fontSize: 16 }} />
         </ListItemIcon>
