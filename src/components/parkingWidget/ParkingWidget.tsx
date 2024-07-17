@@ -96,7 +96,7 @@ function ParkingWidget() {
   }, [map, flyToLocation]);
 
   return (
-    <Stack direction="row" alignItems="stretch" height={400}>
+    <Stack direction="row" alignItems="stretch" height={600} width={1200}>
       <Paper
         elevation={0}
         sx={{ width: '40%', position: 'relative', overflow: 'auto' }}

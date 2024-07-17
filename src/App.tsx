@@ -65,33 +65,36 @@ function App() {
         display: "grid",
       }}
     >
-      {/* <Tabs
+      <Tabs
         value={value}
         onChange={handleChange}
       >
-        <Tab label="Risk Map" {...a11yProps(0)} />
-        <Tab label="Parking Widget" {...a11yProps(1)} />
-        <Tab label="Intersection Dashboard" {...a11yProps(2)} />
+        <Tab label="RWS Risk Map" {...a11yProps(0)} />
+        <Tab label="Brabant Risk Map" {...a11yProps(1)} />
+        <Tab label="Amsterdam Parking" {...a11yProps(2)} />
+        <Tab label="Intersection Dashboard" {...a11yProps(3)} />
         
       </Tabs>
       <TabPanel value={value} index={0}>
         <WidgetWrapper>
-          <RiskMap />
+          <RiskMap title="Rijkswaterstaat" filePath="./accidents-excel/Rijkswaterstaat-accidents.xlsx" zoom={7}/>
         </WidgetWrapper>
       </TabPanel>
       <TabPanel value={value} index={1}>
         <WidgetWrapper>
-          <ParkingWidget />
+          <RiskMap title="Brabant" filePath="./accidents-excel/brabant2022.xlsx" zoom={8}/>
         </WidgetWrapper>
       </TabPanel>
       <TabPanel value={value} index={2}>
         <WidgetWrapper>
+          <ParkingWidget />
+        </WidgetWrapper>
+      </TabPanel>
+      <TabPanel value={value} index={3}>
+        <WidgetWrapper>
           <IntersectionDashboard />
         </WidgetWrapper>
-      </TabPanel> */}
-      <WidgetWrapper>
-        <RiskMap />
-      </WidgetWrapper>
+      </TabPanel>
     </Box>
   );
 }

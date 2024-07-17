@@ -35,11 +35,15 @@ import { useDispatch } from "react-redux";
 import { selectAccidentAction, useSelectAccident } from "./useSelectAccident";
 import AccidentLocationList from "./AccidentLocationList";
 
-const RiskMap = () => {
+interface RiskMapProps {
+  title: string,
+  filePath: string,
+  zoom: number
+}
+
+const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
   const dispatch = useDispatch();
   // Parse the Excel file to retrieve the accidents
-  const filePath = "./accidents-excel/Rijkswaterstaat-accidents.xlsx";
-  // const filePath = "./accidents-excel/brabant2022.xlsx";
   const [accidentData, setAccidentData] = useState<Array<AccidentData>>([]);
   const [loading, setLoading] = useState(true);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -161,6 +165,7 @@ const RiskMap = () => {
       setLoading(false);
     };
     fetchData();
+  //eslint-disable-next-line
   }, []);
   const validMapLayers = (layers: string[]) => {
     return map && layers.every(layer => map.getLayer(layer));
@@ -449,7 +454,7 @@ const RiskMap = () => {
             zIndex: 1,
           }}
         >
-          <Typography variant="h6">Rijkswaterstaat Accidents</Typography>
+          <Typography variant="h6">{title} Accidents</Typography>
         </Box>
 
         <List>
@@ -613,7 +618,7 @@ const RiskMap = () => {
           <MapBoxContainer
             mapState={[map, setMap]}
             location={[5.025243, 51.567082] as LngLatLike}
-            zoomLevel={7}
+            zoomLevel={zoom}
             onLoadFunction={(map: mapboxgl.Map) => selectAccidentAction(map, dispatch)}
           />
         </Box>
