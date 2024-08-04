@@ -15,8 +15,8 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
@@ -26,22 +26,30 @@ import mapboxgl, { LngLatLike } from "mapbox-gl";
 import featureCollectionConverter from "./featureCollectionConverter";
 import MapBoxContainer from "../MapBoxContainer";
 
-import accidentsLayerPointLayer from './layers/accidentsLayerPointLayer.json';
-import accidentsLayerSegmentLayer from './layers/accidentsLayerSegmentLayer.json';
+import accidentsLayerPointLayer from "./layers/accidentsLayerPointLayer.json";
+import accidentsLayerSegmentLayer from "./layers/accidentsLayerSegmentLayer.json";
 
-import { AnyLayer } from 'mapbox-gl';
+import { AnyLayer } from "mapbox-gl";
 import { heatmapLayer } from "./layers/accidentsHeatmapLayer";
 import { useDispatch } from "react-redux";
 import { selectAccidentAction, useSelectAccident } from "./useSelectAccident";
 import AccidentLocationList from "./AccidentLocationList";
 
 interface RiskMapProps {
-  title: string,
-  filePath: string,
-  zoom: number
+  title: string;
+  filePath: string;
+  opacityLevel: number;
+  weight: number;
+  zoom: number;
 }
 
-const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
+const RiskMap = ({
+  title,
+  filePath,
+  opacityLevel,
+  weight,
+  zoom,
+}: RiskMapProps) => {
   const dispatch = useDispatch();
   // Parse the Excel file to retrieve the accidents
   const [accidentData, setAccidentData] = useState<Array<AccidentData>>([]);
@@ -67,8 +75,10 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
   const [heatmapVisible, setHeatmapVisible] = useState(true);
   const [pointsVisible, setPointsVisible] = useState(true);
 
-  const directionOptions = ['L', 'R', 'Both']
-  const [selectedDirections, setSelectedDirections] = useState<string[]>(['Both']);
+  const directionOptions = ["L", "R", "Both"];
+  const [selectedDirections, setSelectedDirections] = useState<string[]>([
+    "Both",
+  ]);
 
   const handleDirectionChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -76,13 +86,13 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
   ) => {
     const lastPressed = (event.currentTarget as HTMLButtonElement).value;
 
-    if (lastPressed === 'Both') {
-      setSelectedDirections((prevDirections) => 
-        prevDirections.includes('Both') ? [] : ['Both']
+    if (lastPressed === "Both") {
+      setSelectedDirections((prevDirections) =>
+        prevDirections.includes("Both") ? [] : ["Both"]
       );
     } else {
       setSelectedDirections((prevDirections) => {
-        if (prevDirections.includes('Both')) {
+        if (prevDirections.includes("Both")) {
           return [lastPressed];
         } else {
           return newDirections;
@@ -165,18 +175,30 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
       setLoading(false);
     };
     fetchData();
-  //eslint-disable-next-line
+    //eslint-disable-next-line
   }, []);
   const validMapLayers = (layers: string[]) => {
-    return map && layers.every(layer => map.getLayer(layer));
-  } 
+    return map && layers.every((layer) => map.getLayer(layer));
+  };
 
   useSelectAccident(map, geoJSONDataHeatmap);
 
-  const allLayers = ['accidentsLayerPoint', 'accidentsLayerSegment', 'accidentsHeatmapLeft', 'accidentsHeatmapRight', 'accidentsHeatmapAll']
-  const allSources = ['accidentsLocationsSourcePoint', 'accidentsLocationsSourceSegment', 'accidentsSourceHeatmapLeft', 'accidentsSourceHeatmapRight', 'accidentsSourceHeatmapAll']
-  const dataLayers = ['accidentsLayerPoint', 'accidentsLayerSegment']
-  const heatMapLayers = ['accidentsHeatmapLeft', 'accidentsHeatmapRight']
+  const allLayers = [
+    "accidentsLayerPoint",
+    "accidentsLayerSegment",
+    "accidentsHeatmapLeft",
+    "accidentsHeatmapRight",
+    "accidentsHeatmapAll",
+  ];
+  const allSources = [
+    "accidentsLocationsSourcePoint",
+    "accidentsLocationsSourceSegment",
+    "accidentsSourceHeatmapLeft",
+    "accidentsSourceHeatmapRight",
+    "accidentsSourceHeatmapAll",
+  ];
+  const dataLayers = ["accidentsLayerPoint", "accidentsLayerSegment"];
+  const heatMapLayers = ["accidentsHeatmapLeft", "accidentsHeatmapRight"];
 
   useEffect(() => {
     if (!map) return;
@@ -208,34 +230,40 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
       });
       map.addLayer(accidentsLayerSegmentLayer as AnyLayer);
 
-      const geoJSONDataHeatmapLeft = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
-      geoJSONDataHeatmapLeft.features = geoJSONDataHeatmapLeft.features.filter(feature => feature.properties?.zijde === 'L')
+      // const geoJSONDataHeatmapLeft = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+      // geoJSONDataHeatmapLeft.features = geoJSONDataHeatmapLeft.features.filter(feature => feature.properties?.zijde === 'L')
 
-      map.addSource("accidentsSourceHeatmapLeft", {
-        type: "geojson",
-        data: geoJSONDataHeatmapLeft as GeoJSON.FeatureCollection,
-      });
-      map.addLayer(heatmapLayer('accidentsHeatmapLeft', 'accidentsSourceHeatmapLeft') as AnyLayer);
+      // map.addSource("accidentsSourceHeatmapLeft", {
+      //   type: "geojson",
+      //   data: geoJSONDataHeatmapLeft as GeoJSON.FeatureCollection,
+      // });
+      // map.addLayer(heatmapLayer('accidentsHeatmapLeft', 'accidentsSourceHeatmapLeft', opacityLevel) as AnyLayer);
 
+      // const geoJSONDataHeatmapRight = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+      // geoJSONDataHeatmapRight.features = geoJSONDataHeatmapRight.features.filter(feature => feature.properties?.zijde !== 'L')
 
-      const geoJSONDataHeatmapRight = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
-      geoJSONDataHeatmapRight.features = geoJSONDataHeatmapRight.features.filter(feature => feature.properties?.zijde !== 'L')
+      // map.addSource("accidentsSourceHeatmapRight", {
+      //   type: "geojson",
+      //   data: geoJSONDataHeatmapRight as GeoJSON.FeatureCollection,
+      // });
+      // map.addLayer(heatmapLayer('accidentsHeatmapRight', 'accidentsSourceHeatmapRight', opacityLevel) as AnyLayer);
 
-      map.addSource("accidentsSourceHeatmapRight", {
-        type: "geojson",
-        data: geoJSONDataHeatmapRight as GeoJSON.FeatureCollection,
-      });
-      map.addLayer(heatmapLayer('accidentsHeatmapRight', 'accidentsSourceHeatmapRight') as AnyLayer); 
-
-
-      const geoJSONDataHeatmapAll = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
+      const geoJSONDataHeatmapAll = JSON.parse(
+        JSON.stringify(geoJSONDataHeatmap)
+      ) as GeoJSON.FeatureCollection;
 
       map.addSource("accidentsSourceHeatmapAll", {
         type: "geojson",
         data: geoJSONDataHeatmapAll as GeoJSON.FeatureCollection,
       });
-      map.addLayer(heatmapLayer('accidentsHeatmapAll', 'accidentsSourceHeatmapAll') as AnyLayer); 
-      
+      map.addLayer(
+        heatmapLayer(
+          "accidentsHeatmapAll",
+          "accidentsSourceHeatmapAll",
+          opacityLevel,
+          weight
+        ) as AnyLayer
+      );
     };
 
     addSourcesAndLayers();
@@ -255,71 +283,67 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
         }
       }
     };
-  }, [
-    map,
-    geoJSONDataPoint,
-    geoJSONDataSegment,
-    geoJSONDataHeatmap,
-  ]);
+  }, [map, geoJSONDataPoint, geoJSONDataSegment, geoJSONDataHeatmap]);
 
   useEffect(() => {
     if (!validMapLayers(allLayers)) return;
-    
+
     // Set visibility for heatmap layers based on selectedDirections
-    if (selectedDirections.includes('L')) {
-      map!.setLayoutProperty('accidentsHeatmapLeft', 'visibility', 'visible');
+    if (selectedDirections.includes("L")) {
+      map!.setLayoutProperty("accidentsHeatmapLeft", "visibility", "visible");
     } else {
-      map!.setLayoutProperty('accidentsHeatmapLeft', 'visibility', 'none');
+      map!.setLayoutProperty("accidentsHeatmapLeft", "visibility", "none");
     }
 
-    if (selectedDirections.includes('R')) {
-      map!.setLayoutProperty('accidentsHeatmapRight', 'visibility', 'visible');
+    if (selectedDirections.includes("R")) {
+      map!.setLayoutProperty("accidentsHeatmapRight", "visibility", "visible");
     } else {
-      map!.setLayoutProperty('accidentsHeatmapRight', 'visibility', 'none');
+      map!.setLayoutProperty("accidentsHeatmapRight", "visibility", "none");
     }
 
-    if (selectedDirections.includes('Both')) {
-      map!.setLayoutProperty('accidentsHeatmapAll', 'visibility', 'visible');
-      dataLayers.forEach(layer => {
+    if (selectedDirections.includes("Both")) {
+      map!.setLayoutProperty("accidentsHeatmapAll", "visibility", "visible");
+      dataLayers.forEach((layer) => {
         map!.setFilter(layer, null); // Remove any existing filters
       });
     } else {
-      map!.setLayoutProperty('accidentsHeatmapAll', 'visibility', 'none');
+      map!.setLayoutProperty("accidentsHeatmapAll", "visibility", "none");
       // Filter points based on selectedDirections
-      dataLayers.forEach(layer => map!.setFilter(layer, [
-        'in',
-        ['get', 'zijde'],
-        ['literal', selectedDirections]
-      ]));
+      dataLayers.forEach((layer) =>
+        map!.setFilter(layer, [
+          "in",
+          ["get", "zijde"],
+          ["literal", selectedDirections],
+        ])
+      );
     }
-
-  }, [geoJSONDataHeatmap,selectedDirections])
+  }, [geoJSONDataHeatmap, selectedDirections]);
 
   const setVisibility = (layers: string[], value: string) => {
     layers.forEach((layer) => {
-      map!.setLayoutProperty(layer, 'visibility', value);
-    })
-  }
+      map!.setLayoutProperty(layer, "visibility", value);
+    });
+  };
 
   useEffect(() => {
     if (!validMapLayers(dataLayers)) return;
     if (pointsVisible) {
-      setVisibility(dataLayers, 'visible')
+      setVisibility(dataLayers, "visible");
+    } else {
+      setVisibility(dataLayers, "none");
     }
-    else {
-      setVisibility(dataLayers, 'none')
-    }
-  }, [pointsVisible])
+  }, [pointsVisible]);
 
   useEffect(() => {
-    if (!validMapLayers(heatMapLayers)) return;
+    if (!validMapLayers(["accidentsHeatmapAll"])) return;
     if (heatmapVisible) {
-      setVisibility(heatMapLayers, 'visible')
+      setVisibility(["accidentsHeatmapAll"], "visible");
+      // setVisibility(heatMapLayers, 'visible')
+    } else {
+      setVisibility(["accidentsHeatmapAll"], "none");
+      // setVisibility(heatMapLayers, 'none')
     }
-    else {
-      setVisibility(heatMapLayers, 'none')
-    }
-  }, [heatmapVisible])
+  }, [heatmapVisible]);
 
   /**
    * Hook for displaying the filtered data on the map.
@@ -423,19 +447,18 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
     selectedStartTime,
     selectedEndTime,
   ]);
-  
+
   const finalListWithDirection = useMemo(() => {
-    if (!selectedDirections.includes('Both')) {
-      return filteredAccidentData.filter(
-        (location) => {
-            return selectedDirections.some((direction => location.Zijde === direction))
-        }
-      );
+    if (!selectedDirections.includes("Both")) {
+      return filteredAccidentData.filter((location) => {
+        return selectedDirections.some((direction) =>
+          location.Zijde.startsWith(direction)
+        );
+      });
+    } else {
+      return filteredAccidentData;
     }
-    else {
-      return filteredAccidentData
-    }
-  }, [filteredAccidentData, selectedDirections])
+  }, [filteredAccidentData, selectedDirections]);
 
   // To access the accidents, use accidents.current
   return (
@@ -501,23 +524,29 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
             alignItems="center"
             sx={{ width: "100%", paddingBottom: 1 }}
           >
-              <Typography
-                variant="body2"
-                sx={{ paddingLeft: 9, paddingRight: 3 }}
-              >
-                Filter by road direction:
-              </Typography>
+            <Typography
+              variant="body2"
+              sx={{ paddingLeft: 9, paddingRight: 3 }}
+            >
+              Filter by road direction:
+            </Typography>
 
             <ToggleButtonGroup
-              color='primary'
+              color="primary"
+              disabled={true}
               value={selectedDirections}
               onChange={handleDirectionChange}
-              aria-label='directions'
-              size='small'
-              sx={{ width: 'fit-content'}}
+              aria-label="directions"
+              size="small"
+              sx={{ width: "fit-content" }}
             >
               {directionOptions.map((direction) => (
-                <ToggleButton key={direction} value={direction} aria-label={direction} sx={{ width: '60px' }}>
+                <ToggleButton
+                  key={direction}
+                  value={direction}
+                  aria-label={direction}
+                  sx={{ width: "60px" }}
+                >
                   {direction}
                 </ToggleButton>
               ))}
@@ -608,8 +637,9 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
           <ListSubheader sx={{ top: 45, bgcolor: "background.paper" }}>
             All Accidents ({finalListWithDirection.length})
           </ListSubheader>
-          <AccidentLocationList filteredAccidentData={finalListWithDirection}></AccidentLocationList>
-
+          <AccidentLocationList
+            filteredAccidentData={finalListWithDirection}
+          ></AccidentLocationList>
         </List>
       </Paper>
 
@@ -619,7 +649,9 @@ const RiskMap = ({title, filePath, zoom}: RiskMapProps) => {
             mapState={[map, setMap]}
             location={[5.025243, 51.567082] as LngLatLike}
             zoomLevel={zoom}
-            onLoadFunction={(map: mapboxgl.Map) => selectAccidentAction(map, dispatch)}
+            onLoadFunction={(map: mapboxgl.Map) =>
+              selectAccidentAction(map, dispatch)
+            }
           />
         </Box>
       </Box>
