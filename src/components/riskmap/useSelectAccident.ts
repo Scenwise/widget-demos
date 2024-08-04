@@ -46,7 +46,7 @@ export const useSelectAccident = (
         center: (
           geoJSONDataHeatmap?.features.find(
             (feature) =>
-              Number(feature?.properties?.gid) === Number(selectedAccidentID)
+              String(feature?.properties?.gid) === String(selectedAccidentID)
           )?.geometry as GeoJSON.Point
         ).coordinates as LngLatLike,
         zoom: 14,
