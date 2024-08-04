@@ -65,32 +65,52 @@ function App() {
         display: "grid",
       }}
     >
-      <Tabs
-        value={value}
-        onChange={handleChange}
-      >
-        <Tab label="RWS Risk Map" {...a11yProps(0)} />
-        <Tab label="Brabant Risk Map" {...a11yProps(1)} />
-        <Tab label="Amsterdam Parking" {...a11yProps(2)} />
-        <Tab label="Intersection Dashboard" {...a11yProps(3)} />
-        
+      <Tabs value={value} onChange={handleChange}>
+        <Tab label="RWS Risk Map (Full)" {...a11yProps(0)} />
+        <Tab label="RWS Risk Map" {...a11yProps(1)} />
+        <Tab label="Brabant Risk Map" {...a11yProps(2)} />
+        <Tab label="Amsterdam Parking" {...a11yProps(3)} />
+        <Tab label="Intersection Dashboard" {...a11yProps(4)} />
       </Tabs>
       <TabPanel value={value} index={0}>
         <WidgetWrapper>
-          <RiskMap title="Rijkswaterstaat" filePath="./accidents-excel/Rijkswaterstaat-accidents.xlsx" zoom={7}/>
+          <RiskMap
+            title="Rijkswaterstaat"
+            filePath="./accidents-excel/RWS-accidents-new.xlsx"
+            zoom={7}
+            opacityLevel={4}
+            weight={0.1}
+          />
         </WidgetWrapper>
       </TabPanel>
       <TabPanel value={value} index={1}>
         <WidgetWrapper>
-          <RiskMap title="Brabant" filePath="./accidents-excel/brabant2022.xlsx" zoom={8}/>
+          <RiskMap
+            title="Rijkswaterstaat"
+            filePath="./accidents-excel/Rijkswaterstaat-accidents.xlsx"
+            zoom={7}
+            opacityLevel={7}
+            weight={1}
+          />
         </WidgetWrapper>
       </TabPanel>
       <TabPanel value={value} index={2}>
         <WidgetWrapper>
-          <ParkingWidget />
+          <RiskMap
+            title="Brabant"
+            filePath="./accidents-excel/brabant2022.xlsx"
+            zoom={8}
+            opacityLevel={7}
+            weight={1}
+          />
         </WidgetWrapper>
       </TabPanel>
       <TabPanel value={value} index={3}>
+        <WidgetWrapper>
+          <ParkingWidget />
+        </WidgetWrapper>
+      </TabPanel>
+      <TabPanel value={value} index={4}>
         <WidgetWrapper>
           <IntersectionDashboard />
         </WidgetWrapper>

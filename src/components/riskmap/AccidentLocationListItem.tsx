@@ -41,7 +41,9 @@ const AccidentLocationListItem = ({
   Melder,
 }: AccidentLocationListItemProps) => {
   const dispatch = useDispatch();
-  const selectedAccidentID = useSelector((state: RootState) => state.accidentsWidget.selectedAccidentID);
+  const selectedAccidentID = useSelector(
+    (state: RootState) => state.accidentsWidget.selectedAccidentID
+  );
 
   if (Proces === "null") Proces = "Unknown";
   if (Melder === "null") Melder = "Unknown";
@@ -54,11 +56,12 @@ const AccidentLocationListItem = ({
         onClick={() => dispatch(updateSelectedAccidentID(id))}
         sx={{
           alignItems: "flex-start",
-          backgroundColor: selectedAccidentID === id ? '#fff8c7' : 'inherit',
-          '&:hover': {
-            backgroundColor: '#fff8c7',
+          backgroundColor: selectedAccidentID === id ? "#fff8c7" : "inherit",
+          "&:hover": {
+            backgroundColor: "#fff8c7",
           },
-        }}      >
+        }}
+      >
         <ListItemIcon sx={{ minWidth: 30, paddingTop: 1.1 }}>
           <Circle sx={{ color: color, fontSize: 16 }} />
         </ListItemIcon>
@@ -70,6 +73,13 @@ const AccidentLocationListItem = ({
           }
           secondary={
             <>
+              {id && (
+                <>
+                  <Typography variant="body2" component="div">
+                    <b>ID:</b> {id}
+                  </Typography>
+                </>
+              )}
               <Typography variant="body2" component="div">
                 <b>Road side:</b> {zijde}
               </Typography>

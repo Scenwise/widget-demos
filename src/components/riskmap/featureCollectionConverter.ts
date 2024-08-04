@@ -3,12 +3,17 @@ import { LngLatLike } from "mapbox-gl";
 
 const segmentCoordinates = (data: AccidentData) => {
   const coordinates: Array<number[]> = [];
-  data.Points.split(";").forEach((coordinate) => {
-    const lnglat = coordinate.split(",");
-    const points: number[] = [];
-    lnglat.forEach((x) => points.push(Number.parseFloat(x)));
-    coordinates.push(points);
-  });
+  if (data["Points"] !== undefined && data["Points"] !== "") {
+    data.Points.split(";").forEach((coordinate) => {
+      const lnglat = coordinate.split(",");
+      const points: number[] = [];
+      lnglat.forEach((x) => points.push(Number.parseFloat(x)));
+      coordinates.push(points);
+    });
+  } else {
+    coordinates.push([data["Latitude_van"], data["Longitude_van"]]);
+    coordinates.push([data["Latitude_tot"], data["Longitude_tot"]]);
+  }
   return coordinates;
 };
 
@@ -39,7 +44,7 @@ const convertToFeature = (data: AccidentData, segment: string) => {
       coordinates: coordinates,
     },
     properties: {
-      gid: data.ID,
+      gid: data.ID + "",
       weg: data.Weg,
       hmp_van: data["Hmp van"],
       hmp_tot: data["Hmp tot"],
@@ -76,11 +81,15 @@ const featureCollectionConverter = (dataArray: Array<AccidentData>) => {
   };
 
   dataArray.forEach((x) => {
-    x["Points"] !== undefined && x["Points"] !== ""
-      ? featureCollectionSegment.features.push(
-          convertToFeature(x, "LineString")
-        )
-      : featureCollectionPoint.features.push(convertToFeature(x, "Point"));
+    if (x["Points"] !== undefined && x["Points"] !== "")
+      featureCollectionSegment.features.push(convertToFeature(x, "LineString"));
+    else if (
+      x["Longitude_tot"] !== -1 &&
+      (x["Longitude_van"] !== x["Longitude_tot"] ||
+        x["Latitude_van"] !== x["Latitude_tot"])
+    )
+      featureCollectionSegment.features.push(convertToFeature(x, "LineString"));
+    else featureCollectionPoint.features.push(convertToFeature(x, "Point"));
     fullFeatureCollection.features.push(convertToFeature(x, "Point"));
   });
 
