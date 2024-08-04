@@ -13,7 +13,7 @@ export const selectAccidentAction = (
   map?.on("click", "accidentsLayerPoint", function (e) {
     if (e.features) {
       const feature = e.features[0];
-      dispatch(updateSelectedAccidentID(feature?.properties?.gid));
+      dispatch(updateSelectedAccidentID(String(feature?.properties?.gid)));
     }
   });
 
@@ -45,8 +45,7 @@ export const useSelectAccident = (
       map!.flyTo({
         center: (
           geoJSONDataHeatmap?.features.find(
-            (feature) =>
-              String(feature?.properties?.gid) === String(selectedAccidentID)
+            (feature) => String(feature?.properties?.gid) === selectedAccidentID
           )?.geometry as GeoJSON.Point
         ).coordinates as LngLatLike,
         zoom: 14,

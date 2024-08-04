@@ -44,7 +44,7 @@ const convertToFeature = (data: AccidentData, segment: string) => {
       coordinates: coordinates,
     },
     properties: {
-      gid: data.ID,
+      gid: data.ID + "",
       weg: data.Weg,
       hmp_van: data["Hmp van"],
       hmp_tot: data["Hmp tot"],
