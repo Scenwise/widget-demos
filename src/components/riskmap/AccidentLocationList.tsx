@@ -63,7 +63,11 @@ const AccidentLocationList: React.FC<AccidentLocationListProps> = ({
                 ? location["Laatste eindtijd"].toTimeString()
                 : ""
             }
-            color={location["Points"] ? "orange" : "red"}
+            color={
+              location["Hmp tot"] && !isNaN(location["Hmp tot"])
+                ? "orange"
+                : "red"
+            }
             Proces={location.Proces}
             Melder={location.Melder}
           />

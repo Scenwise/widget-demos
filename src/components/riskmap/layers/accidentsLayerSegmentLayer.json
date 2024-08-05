@@ -1,11 +1,11 @@
 {
-    "id": "accidentsLayerSegment",
-    "type": "line",
-    "source": "accidentsLocationsSourceSegment",
-    "layout": {},
-    "paint": {
-      "line-color": "orange",
-      "line-width": 3,
-      "line-opacity": 1
-    }
+  "id": "accidentsLayerSegment",
+  "type": "line",
+  "source": "accidentsLocationsSourceSegment",
+  "layout": {},
+  "paint": {
+    "line-color": "orange",
+    "line-width": 2,
+    "line-opacity": 1
   }
+}

@@ -11,8 +11,8 @@ const segmentCoordinates = (data: AccidentData) => {
       coordinates.push(points);
     });
   } else {
-    coordinates.push([data["Latitude_van"], data["Longitude_van"]]);
-    coordinates.push([data["Latitude_tot"], data["Longitude_tot"]]);
+    coordinates.push([data["Longitude_van"], data["Latitude_van"]]);
+    coordinates.push([data["Longitude_tot"], data["Latitude_tot"]]);
   }
   return coordinates;
 };
@@ -83,13 +83,14 @@ const featureCollectionConverter = (dataArray: Array<AccidentData>) => {
   dataArray.forEach((x) => {
     if (x["Points"] !== undefined && x["Points"] !== "")
       featureCollectionSegment.features.push(convertToFeature(x, "LineString"));
-    else if (
-      x["Longitude_tot"] !== -1 &&
-      (x["Longitude_van"] !== x["Longitude_tot"] ||
-        x["Latitude_van"] !== x["Latitude_tot"])
-    )
-      featureCollectionSegment.features.push(convertToFeature(x, "LineString"));
+    // else if (
+    //   x["Longitude_tot"] !== -1 &&
+    //   (x["Longitude_van"] !== x["Longitude_tot"] ||
+    //     x["Latitude_van"] !== x["Latitude_tot"])
+    // )
+    //   featureCollectionSegment.features.push(convertToFeature(x, "LineString"));
     else featureCollectionPoint.features.push(convertToFeature(x, "Point"));
+    // For the heatmap, all features need to be points
     fullFeatureCollection.features.push(convertToFeature(x, "Point"));
   });
 
