@@ -17,6 +17,13 @@ export const selectAccidentAction = (
     }
   });
 
+  map?.on("click", "accidentsLayerSegment", function (e) {
+    if (e.features) {
+      const feature = e.features[0];
+      dispatch(updateSelectedAccidentID(String(feature?.properties?.gid)));
+    }
+  });
+
   changeMousePointers("accidentsLayerPoint", map);
 };
 
@@ -29,18 +36,36 @@ export const useSelectAccident = (
   );
 
   useEffect(() => {
-    if (map && map.getLayer("accidentsLayerPoint") && selectedAccidentID) {
-      map!.setPaintProperty("accidentsLayerPoint", "circle-radius", [
-        "case",
-        ["==", ["get", "gid"], selectedAccidentID],
-        10,
-        6,
-      ]);
+    if (
+      map &&
+      map.getLayer("accidentsLayerPoint") &&
+      map.getLayer("accidentsLayerSegment") &&
+      selectedAccidentID
+    ) {
+      if (map.getLayer("accidentsLayerPoint"))
+        map!.setPaintProperty("accidentsLayerPoint", "circle-radius", [
+          "case",
+          ["==", ["get", "gid"], selectedAccidentID],
+          6,
+          2,
+        ]);
       map!.setPaintProperty("accidentsLayerPoint", "circle-stroke-color", [
         "case",
         ["==", ["get", "gid"], selectedAccidentID],
         "yellow",
         "#FFF",
+      ]);
+      map!.setPaintProperty("accidentsLayerSegment", "line-width", [
+        "case",
+        ["==", ["get", "gid"], selectedAccidentID],
+        5,
+        2,
+      ]);
+      map!.setPaintProperty("accidentsLayerSegment", "line-color", [
+        "case",
+        ["==", ["get", "gid"], selectedAccidentID],
+        "yellow",
+        "orange",
       ]);
       map!.flyTo({
         center: (

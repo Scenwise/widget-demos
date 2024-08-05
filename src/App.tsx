@@ -78,7 +78,7 @@ function App() {
             title="Rijkswaterstaat"
             filePath="./accidents-excel/RWS-accidents-new.xlsx"
             zoom={7}
-            opacityLevel={4}
+            opacityLevel={5}
             weight={0.1}
           />
         </WidgetWrapper>

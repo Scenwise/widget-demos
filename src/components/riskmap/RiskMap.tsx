@@ -73,7 +73,7 @@ const RiskMap = ({
     Array<AccidentData>
   >([]);
   const [heatmapVisible, setHeatmapVisible] = useState(true);
-  const [pointsVisible, setPointsVisible] = useState(true);
+  const [pointsVisible, setPointsVisible] = useState(false);
 
   const directionOptions = ["L", "R", "Both"];
   const [selectedDirections, setSelectedDirections] = useState<string[]>([
@@ -229,6 +229,12 @@ const RiskMap = ({
         data: geoJSONDataSegment as GeoJSON.FeatureCollection,
       });
       map.addLayer(accidentsLayerSegmentLayer as AnyLayer);
+
+      if (pointsVisible) {
+        setVisibility(dataLayers, "visible");
+      } else {
+        setVisibility(dataLayers, "none");
+      }
 
       // const geoJSONDataHeatmapLeft = JSON.parse(JSON.stringify(geoJSONDataHeatmap)) as GeoJSON.FeatureCollection
       // geoJSONDataHeatmapLeft.features = geoJSONDataHeatmapLeft.features.filter(feature => feature.properties?.zijde === 'L')
