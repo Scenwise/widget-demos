@@ -1,167 +1,167 @@
 {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "Id": "66cfd74d-c200-4247-9271-b5d2835b789b",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.93404, 52.403327]
-      },
-      "properties": {
-        "name": "CE-P29 P+R Noord",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "108",
-        "FreeSpaceLong": "16",
-        "ShortCapacity": "409",
-        "LongCapacity": "20"
-      }
-    },
-    {
-      "type": "Feature",
-      "Id": "900000087_parkinglocation",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.90901, 52.37601]
-      },
-      "properties": {
-        "name": "CE-P15 Oosterdok",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "584",
-        "FreeSpaceLong": "",
-        "ShortCapacity": "1000",
-        "LongCapacity": ""
-      }
-    },
-    {
-      "type": "Feature",
-      "Id": "900000003_parkinglocation",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.89722, 52.37907]
-      },
-      "properties": {
-        "name": "CE-P04 Amsterdam Centraal",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "340",
-        "FreeSpaceLong": "18",
-        "ShortCapacity": "385",
-        "LongCapacity": "25"
-      }
-    },
-    {
-      "type": "Feature",
-      "Id": "900000007_parkinglocation",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.89459, 52.37639]
-      },
-      "properties": {
-        "name": "CE-P08 De Kolk",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "214",
-        "FreeSpaceLong": "26",
-        "ShortCapacity": "300",
-        "LongCapacity": "75"
-      }
-    },
-    {
-      "type": "Feature",
-      "Id": "900000008_parkinglocation",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.89508, 52.37382]
-      },
-      "properties": {
-        "name": "CE-P09 Bijenkorf",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "388",
-        "FreeSpaceLong": "40",
-        "ShortCapacity": "465",
-        "LongCapacity": "40"
-      }
-    },
-    {
-      "type": "Feature",
-      "Id": "Parkeergarage Rokin Amsterdam",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.893, 52.37]
-      },
-      "properties": {
-        "name": "Parkeergarage Rokin Amsterdam",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "22",
-        "FreeSpaceLong": "0",
-        "ShortCapacity": "66",
-        "LongCapacity": "0"
-      }
-    },
-    {
-      "type": "Feature",
-      "Id": "P27 Kalverstraat",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.890751, 52.367258]
-      },
-      "properties": {
-        "name": "CE-P27 Kalverstraat",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "23",
-        "FreeSpaceLong": "36",
-        "ShortCapacity": "74",
-        "LongCapacity": "49"
-      }
-    },
-    {
-      "type": "Feature",
-      "Id": "900000117_parkinglocation",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.96043, 52.37135]
-      },
-      "properties": {
-        "name": "CE-P16 P+R Zeeburg 1",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "26",
-        "FreeSpaceLong": "0",
-        "ShortCapacity": "210",
-        "LongCapacity": "0"
-      }
-    },
-    {
-      "type": "Feature",
-      "Id": "901000117_parkinglocation",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [4.96447, 52.36988]
-      },
-      "properties": {
-        "name": "CE-P16 P+R Zeeburg 2",
-        "PubDate": "2022-02-09T19:36:42.006Z",
-        "Type": "parkinglocation",
-        "State": "ok",
-        "FreeSpaceShort": "108",
-        "FreeSpaceLong": "0",
-        "ShortCapacity": "149",
-        "LongCapacity": "0"
-      }
-    }
-  ]
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "Id": "66cfd74d-c200-4247-9271-b5d2835b789b",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.93404, 52.403327]
+            },
+            "properties": {
+                "name": "CE-P29 P+R Noord",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "108",
+                "FreeSpaceLong": "16",
+                "ShortCapacity": "409",
+                "LongCapacity": "20"
+            }
+        },
+        {
+            "type": "Feature",
+            "Id": "900000087_parkinglocation",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.90901, 52.37601]
+            },
+            "properties": {
+                "name": "CE-P15 Oosterdok",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "584",
+                "FreeSpaceLong": "",
+                "ShortCapacity": "1000",
+                "LongCapacity": ""
+            }
+        },
+        {
+            "type": "Feature",
+            "Id": "900000003_parkinglocation",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.89722, 52.37907]
+            },
+            "properties": {
+                "name": "CE-P04 Amsterdam Centraal",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "340",
+                "FreeSpaceLong": "18",
+                "ShortCapacity": "385",
+                "LongCapacity": "25"
+            }
+        },
+        {
+            "type": "Feature",
+            "Id": "900000007_parkinglocation",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.89459, 52.37639]
+            },
+            "properties": {
+                "name": "CE-P08 De Kolk",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "214",
+                "FreeSpaceLong": "26",
+                "ShortCapacity": "300",
+                "LongCapacity": "75"
+            }
+        },
+        {
+            "type": "Feature",
+            "Id": "900000008_parkinglocation",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.89508, 52.37382]
+            },
+            "properties": {
+                "name": "CE-P09 Bijenkorf",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "388",
+                "FreeSpaceLong": "40",
+                "ShortCapacity": "465",
+                "LongCapacity": "40"
+            }
+        },
+        {
+            "type": "Feature",
+            "Id": "Parkeergarage Rokin Amsterdam",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.893, 52.37]
+            },
+            "properties": {
+                "name": "Parkeergarage Rokin Amsterdam",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "22",
+                "FreeSpaceLong": "0",
+                "ShortCapacity": "66",
+                "LongCapacity": "0"
+            }
+        },
+        {
+            "type": "Feature",
+            "Id": "P27 Kalverstraat",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.890751, 52.367258]
+            },
+            "properties": {
+                "name": "CE-P27 Kalverstraat",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "23",
+                "FreeSpaceLong": "36",
+                "ShortCapacity": "74",
+                "LongCapacity": "49"
+            }
+        },
+        {
+            "type": "Feature",
+            "Id": "900000117_parkinglocation",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.96043, 52.37135]
+            },
+            "properties": {
+                "name": "CE-P16 P+R Zeeburg 1",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "26",
+                "FreeSpaceLong": "0",
+                "ShortCapacity": "210",
+                "LongCapacity": "0"
+            }
+        },
+        {
+            "type": "Feature",
+            "Id": "901000117_parkinglocation",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [4.96447, 52.36988]
+            },
+            "properties": {
+                "name": "CE-P16 P+R Zeeburg 2",
+                "PubDate": "2022-02-09T19:36:42.006Z",
+                "Type": "parkinglocation",
+                "State": "ok",
+                "FreeSpaceShort": "108",
+                "FreeSpaceLong": "0",
+                "ShortCapacity": "149",
+                "LongCapacity": "0"
+            }
+        }
+    ]
 }
