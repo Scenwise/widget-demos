@@ -4,9 +4,9 @@
     "source": "accidentsLocationsSourcePoint",
     "layout": {},
     "paint": {
-      "circle-color": "red",
-      "circle-radius": 6,
-      "circle-stroke-color": "#FFF",
-      "circle-stroke-width": 2
+        "circle-color": "red",
+        "circle-radius": 6,
+        "circle-stroke-color": "#FFF",
+        "circle-stroke-width": 2
     }
-  }
+}
